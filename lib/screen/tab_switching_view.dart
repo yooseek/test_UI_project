@@ -81,14 +81,9 @@ class PageTwoScreen extends StatelessWidget {
       body: Container(
         color: Colors.white,
         child: Center(
-          child: Column(
-            children: [
-              Text(
-                '페이지 투투투투투',
-                style: TextStyle(fontSize: 30.0, color: Colors.blue),
-              ),
-              PageTwoText(),
-            ],
+          child: SingleChildScrollView(
+
+            child: PageTwoText()
           ),
         ),
       ),
