@@ -18,62 +18,93 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned(
-            child: _TopWidget(),
-          ),
-           _TopWidget2(),
+          _TopWidget(),
+          _TransformRotate(),
+          _TransformScale(),
+          _TransformTranslate(),
         ],
       ),
     );
   }
 }
 
-class _TopWidget2 extends StatefulWidget {
-  const _TopWidget2({Key? key}) : super(key: key);
+class _TransformRotate extends StatefulWidget {
+  const _TransformRotate({Key? key}) : super(key: key);
 
   @override
-  State<_TopWidget2> createState() => _TopWidget2State();
+  State<_TransformRotate> createState() => _TransformRotateState();
 }
 
-class _TopWidget2State extends State<_TopWidget2> {
+class _TransformRotateState extends State<_TransformRotate> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size.width;
     double degrees = 30;
     double radians = degrees * math.pi / 180;
 
-    return AnimatedContainer(
-      duration: Duration(seconds: 1),
-      child: Transform.rotate(
-        // angle: -25 * math.pi / 180,
-        angle: radians,
-        child: GestureDetector(
-          onPanUpdate: (DragUpdateDetails details) {
-            print('dx = ${details.delta.dx / 100}');
-            print('dy = ${details.delta.dy / 100}');
-            setState(() {
-              degrees = 0;
-            });
-          },
-          onTap: () {
-            setState(() {
-              degrees = 90;
-            });
-          },
-          child: Container(
-            width: screenSize * 0.8,
-            height: screenSize * 0.8,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(150),
-              color: Colors.orange
-            ),
-          ),
-        ),
+    return Transform.rotate(
+      // angle: -25 * math.pi / 180,
+      angle: math.pi / 8,
+      alignment: Alignment.bottomRight,
+      child: Container(
+        width: screenSize * 0.8,
+        height: screenSize * 0.8,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(150), color: Colors.orange),
       ),
     );
   }
 }
 
+class _TransformScale extends StatefulWidget {
+  const _TransformScale({Key? key}) : super(key: key);
+
+  @override
+  State<_TransformScale> createState() => _TransformScaleState();
+}
+
+class _TransformScaleState extends State<_TransformScale> {
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size.width;
+    return Transform.scale(
+      // 0.5배 키우기
+      scale: 0.5,
+      child: Container(
+        width: screenSize * 0.8,
+        height: screenSize * 0.8,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(150), color: Colors.teal),
+      ),
+    );
+  }
+}
+
+class _TransformTranslate extends StatefulWidget {
+  const _TransformTranslate({Key? key}) : super(key: key);
+
+  @override
+  State<_TransformTranslate> createState() => _TransformTranslateState();
+}
+
+class _TransformTranslateState extends State<_TransformTranslate> {
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size.width;
+    double degrees = 30;
+    double radians = degrees * math.pi / 180;
+
+    return Transform.translate(
+      offset: Offset(100.0, 200.0),
+      child: Container(
+        width: screenSize * 0.8,
+        height: screenSize * 0.8,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(150), color: Colors.blue),
+      ),
+    );
+  }
+}
 
 class _TopWidget extends StatefulWidget {
   const _TopWidget({Key? key}) : super(key: key);
@@ -93,11 +124,15 @@ class _TopWidgetState extends State<_TopWidget> {
 
     return Transform(
       transform: Matrix4(
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        0,0,0,1,
-      )..rotateX(x)..rotateY(y)..rotateZ(z),
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+      )
+        ..rotateX(x)
+        ..rotateY(y)
+        ..rotateZ(z),
+      alignment: FractionalOffset.center,
       child: GestureDetector(
         onPanUpdate: (DragUpdateDetails details) {
           print('dx = ${details.delta.dx / 100}');
@@ -112,14 +147,7 @@ class _TopWidgetState extends State<_TopWidget> {
           height: screenSize * 0.5,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(150),
-            gradient: LinearGradient(
-              colors: [
-                Color(0x27292A),
-                Color(0xB316BFC4),
-              ],
-              begin: Alignment(-0.2, 0.8),
-              end: Alignment.bottomCenter,
-            ),
+            color: Colors.pink
           ),
         ),
       ),

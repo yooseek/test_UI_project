@@ -14,10 +14,10 @@ class SlideAnimationWidget extends StatefulWidget {
 
   @override
   State<SlideAnimationWidget> createState() =>
-      _FadeAnimationRouteButtonState();
+      _SlideAnimationWidgetState();
 }
 
-class _FadeAnimationRouteButtonState extends State<SlideAnimationWidget>
+class _SlideAnimationWidgetState extends State<SlideAnimationWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<Offset> slideAnimation;

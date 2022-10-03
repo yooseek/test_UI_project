@@ -28,10 +28,11 @@ class FadeAnimationRouteButton extends StatelessWidget {
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) {
-        return FadeTransition(
-          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
-          child: nextScreen,
-        );
+        // return FadeTransition(
+        //   opacity: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+        //   child: nextScreen,
+        // );
+        return nextScreen;
       },
       transitionDuration: Duration(seconds: duration),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {

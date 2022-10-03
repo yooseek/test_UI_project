@@ -5,6 +5,7 @@ import 'package:test_ui_project/component/animation/fade_animation_route_button.
 import 'package:test_ui_project/component/animation/fade_animation_widget.dart';
 import 'package:test_ui_project/component/animation/interval_fade_animation_list.dart';
 import 'package:test_ui_project/component/animation/rotate_animation_widget.dart';
+import 'package:test_ui_project/component/animation/simple_rotate_animation_widget.dart';
 import 'package:test_ui_project/component/animation/text_animation_widget.dart';
 import 'package:test_ui_project/component/animation/interval_slide_animation_list.dart';
 import 'package:test_ui_project/component/animation/slide_animation_widget.dart';
@@ -57,7 +58,7 @@ class _TabSwitchingState extends State<TabSwitching>{
                   const SlideAnimationRouteButton(
                     buttonChildWidget: Text('슬라이드 버튼'),
                     nextScreen: PageTwoScreen(),
-                    duration: 5,
+                    duration: 3,
                   ),
                   ElevatedButton(onPressed: (){
                     Navigator.of(context).push(MaterialPageRoute(builder: (_) => PageTwoScreen()));
@@ -114,7 +115,8 @@ class PageTwoText extends StatelessWidget {
             Text('3번 애니메이션'),
           ],duration: 5,),
           TextAnimationWidget(text: '텍스트 애니메이션 입니다',duration: 5),
-          RotateAnimationWidget(text: '로테이션 애니메이션 위젯입니다.',duration: 2,)
+          RotateAnimationWidget(text: '로테이션 애니메이션 위젯입니다.',duration: 2,),
+          SimpleRotateAnimationWidget(child: Text('회전 애니메이션 입니다.')),
         ],
       ),
     );

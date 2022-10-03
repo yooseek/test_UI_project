@@ -35,6 +35,13 @@ class _TextAnimationWidgetState extends State<TextAnimationWidget>
     controller.forward();
   }
 
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // fade 까지 주려면
