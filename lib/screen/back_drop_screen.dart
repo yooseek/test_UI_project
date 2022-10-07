@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:test_ui_project/component/animation/fade_animation_widget.dart';
 
 class BackDropScreen extends StatelessWidget {
   const BackDropScreen({Key? key}) : super(key: key);
@@ -18,9 +19,9 @@ class BackDropScreen extends StatelessWidget {
             ),
           ),
           BottomList(
-              topPadding: 500,
-              childList: List.generate(100, (index) => index),
-              deviceSize: size,
+            topPadding: 500,
+            childList: List.generate(100, (index) => index),
+            deviceSize: size,
           ),
         ],
       ),
@@ -78,11 +79,13 @@ class _BottomListState extends State<BottomList> {
               double maxScroll = 150;
               double scrollPx = _scroller.position.pixels - blurStart;
               // Normalize scroll position to a value between 0 and 1
-              backdropAmt = (_scroller.position.pixels - blurStart)
-                  .clamp(0, maxScroll) /
-                  maxScroll;
+              backdropAmt =
+                  (_scroller.position.pixels - blurStart).clamp(0, maxScroll) /
+                      maxScroll;
               // Disable backdrop once it is offscreen for an easy perf win
-              showBackdrop = (scrollPx + (widget.deviceSize.height- widget.topPadding) <= widget.deviceSize.height);
+              showBackdrop =
+                  (scrollPx + (widget.deviceSize.height - widget.topPadding) <=
+                      widget.deviceSize.height);
             }
             return Stack(
               children: [
@@ -115,6 +118,22 @@ class _BottomListState extends State<BottomList> {
       );
     }
 
+    final listItems = <Widget>[];
+    for (var e in widget.childList) {
+      listItems.add(
+        FadeAnimationWidget(
+          duration: 2,
+          child: Container(
+            width: double.infinity,
+            child: Text(
+              e.toString(),
+              style: TextStyle(fontSize: 18.0),
+            ),
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       controller: _scroller,
       physics: const BouncingScrollPhysics(),
@@ -132,18 +151,7 @@ class _BottomListState extends State<BottomList> {
             ),
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
-              children: [
-                buildHandle(),
-                ...widget.childList
-                    .map((e) => Container(
-                  width: double.infinity,
-                  child: Text(
-                    e.toString(),
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                ))
-                    .toList()
-              ],
+              children: [buildHandle(), ...listItems],
             ),
           ),
         ],
