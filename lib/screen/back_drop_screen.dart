@@ -55,8 +55,13 @@ class BottomList extends StatefulWidget {
 }
 
 class _BottomListState extends State<BottomList> {
-  final ScrollController _scroller = ScrollController();
+  late final ScrollController _scroller = ScrollController()..addListener(_handleScrollChanged);
+  final _scrollPos = ValueNotifier(0.0);
   bool isBackdropFilter = true;
+
+  void _handleScrollChanged() {
+    _scrollPos.value = _scroller.position.pixels;
+  }
 
   @override
   void dispose() {
@@ -99,6 +104,7 @@ class _BottomListState extends State<BottomList> {
                     ),
                   ),
                 ],
+                disableByScroll(),
                 _bottomListContent(),
               ],
             );
@@ -106,6 +112,23 @@ class _BottomListState extends State<BottomList> {
         );
       }),
     );
+  }
+
+  ValueListenableBuilder<double> disableByScroll() {
+    return ValueListenableBuilder<double>(
+                valueListenable: _scrollPos,
+                builder: (_, value, child) {
+                  // get some value between 0 and 1, based on the amt scrolled
+                  double opacity = (1 - value / 150).clamp(0, 1);
+                  return Opacity(opacity: opacity, child: child);
+                },
+
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  color: Colors.teal,
+                ),
+              );
   }
 
   Widget _bottomListContent() {
