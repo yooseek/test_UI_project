@@ -57,25 +57,9 @@ class tempScreen extends StatelessWidget {
         SizedBox(
           height: 200,
         ),
-        Expanded(
-          child: ListWheelScrollView.useDelegate(
-            childDelegate: ListWheelChildLoopingListDelegate(
-              children: List.generate(3000, (index) {
-                return TestList(text: index.toString(),);
-              }),
-            ),
-            // 아이템당 높이
-            itemExtent: 50,
-            // 바퀴의 지름 설정 - 원통의 지름과 주축의 뷰포트 크기 사이의 비율
-            diameterRatio: 2.0,
-            // 바퀴의 축을 설정
-            offAxisFraction: -0.5,
-            // 확대 설정
-            useMagnifier: true,
-            magnification: 1.5,
-            // 돋보기 위와 아래에 나타나는 휠에 적용할 불투명도 값
-            overAndUnderCenterOpacity: 0.5,
-          ),
+        Hero(
+          tag: 'hi',
+          child: Image.asset('assets/images/hi.png'),
         ),
       ],
     );
@@ -84,6 +68,7 @@ class tempScreen extends StatelessWidget {
 
 class TestList extends StatelessWidget {
   final String text;
+
   const TestList({required this.text, Key? key}) : super(key: key);
 
   @override

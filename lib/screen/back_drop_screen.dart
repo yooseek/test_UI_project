@@ -19,7 +19,9 @@ class BackDropScreen extends StatelessWidget {
                 borderRadius: BorderRadius.only(
                     topRight:
                         Radius.elliptical(size.width / 2, size.height / 2)),
-                child: Image.asset('assets/images/screen_shot.png'),
+                child: Hero(
+                    tag: 'hi',
+                    child: Image.asset('assets/images/screen_shot.png')),
               ),
             ),
             BottomList(
@@ -36,6 +38,7 @@ class BackDropScreen extends StatelessWidget {
 
 class TopContent extends StatelessWidget {
   final Widget child;
+
   const TopContent({required this.child, Key? key}) : super(key: key);
 
   @override
@@ -48,6 +51,7 @@ class BottomList extends StatefulWidget {
   final double topPadding;
   final List childList;
   final Size deviceSize;
+
   const BottomList({
     required this.topPadding,
     required this.childList,
