@@ -11,19 +11,24 @@ class BackDropScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Stack(
-        children: [
-          TopContent(
-            child: Container(
-              child: Image.asset('assets/images/screen_shot.png'),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            TopContent(
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                    topRight:
+                        Radius.elliptical(size.width / 2, size.height / 2)),
+                child: Image.asset('assets/images/screen_shot.png'),
+              ),
             ),
-          ),
-          BottomList(
-            topPadding: 500,
-            childList: List.generate(100, (index) => index),
-            deviceSize: size,
-          ),
-        ],
+            BottomList(
+              topPadding: 500,
+              childList: List.generate(100, (index) => index),
+              deviceSize: size,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -55,7 +60,8 @@ class BottomList extends StatefulWidget {
 }
 
 class _BottomListState extends State<BottomList> {
-  late final ScrollController _scroller = ScrollController()..addListener(_handleScrollChanged);
+  late final ScrollController _scroller = ScrollController()
+    ..addListener(_handleScrollChanged);
   final _scrollPos = ValueNotifier(0.0);
   bool isBackdropFilter = true;
 
@@ -114,21 +120,21 @@ class _BottomListState extends State<BottomList> {
     );
   }
 
+  // 스크롤에 따라서 사라지는 위젯
   ValueListenableBuilder<double> disableByScroll() {
     return ValueListenableBuilder<double>(
-                valueListenable: _scrollPos,
-                builder: (_, value, child) {
-                  // get some value between 0 and 1, based on the amt scrolled
-                  double opacity = (1 - value / 150).clamp(0, 1);
-                  return Opacity(opacity: opacity, child: child);
-                },
-
-                child: Container(
-                  height: 50,
-                  width: 50,
-                  color: Colors.teal,
-                ),
-              );
+      valueListenable: _scrollPos,
+      builder: (_, value, child) {
+        // get some value between 0 and 1, based on the amt scrolled
+        double opacity = (1 - value / 150).clamp(0, 1);
+        return Opacity(opacity: opacity, child: child);
+      },
+      child: Container(
+        height: 50,
+        width: 50,
+        color: Colors.teal,
+      ),
+    );
   }
 
   Widget _bottomListContent() {
