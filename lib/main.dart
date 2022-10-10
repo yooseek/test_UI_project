@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:test_ui_project/component/animation/rotate_animation_widget.dart';
 import 'package:test_ui_project/screen/back_drop_screen.dart';
 import 'package:test_ui_project/screen/login_ui_screen.dart';
 import 'package:test_ui_project/screen/tab_switching_view.dart';
@@ -37,12 +38,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class tempScreen extends StatelessWidget {
+class tempScreen extends StatefulWidget {
   const tempScreen({Key? key}) : super(key: key);
 
   @override
+  State<tempScreen> createState() => _tempScreenState();
+}
+
+class _tempScreenState extends State<tempScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller;
+  late final Animation<double> animation;
+  bool showFirstWidget = true;
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
         Center(
           child: ElevatedButton(
@@ -57,12 +68,79 @@ class tempScreen extends StatelessWidget {
         SizedBox(
           height: 200,
         ),
-        Hero(
-          tag: 'hi',
-          child: Image.asset('assets/images/hi.png'),
+        AnimatedBuilder(
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            return Transform.rotate(
+              angle: animation.value,
+              child: child,
+            );
+          },
+          child: SizedBox(
+            height: 300,
+            child: Align(
+              heightFactor: 2.0,
+              widthFactor: 2.0,
+              alignment: Alignment(0.5, 1.0),
+              child: Image.asset(
+                'assets/images/hi.png',
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 30,
+          child: Column(
+            children: [
+              Text('위에 있는 위젯임다'),
+              AnimatedCrossFade(
+                duration: Duration(seconds: 1),
+                firstChild: SizedBox(height: 300,child: Text('첫번 째 위젯임다')),
+                secondChild: Text('두번 째 위젯임다'),
+                crossFadeState: showFirstWidget
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                // 위젯 크키가 다를 때 이런 방식도 가능, 이건 안써도됨
+                layoutBuilder:
+                    (firstWidget, firstKey, secondWidget, secondKey) {
+                  return Stack(
+                    children: [
+                      Positioned(key: secondKey, child: secondWidget),
+                      Positioned(key: firstKey, child: firstWidget),
+                    ],
+                  );
+                },
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showFirstWidget = !showFirstWidget;
+                  });
+                },
+                child: Text('위젯 바꾸기'),
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      duration: Duration(seconds: 3),
+      vsync: this,
+    );
+    animation = Tween(begin: 0.0, end: 2.0 * pi).animate(controller);
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 
