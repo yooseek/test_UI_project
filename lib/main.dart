@@ -32,129 +32,36 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
+        extendBody: true,
+        bottomNavigationBar: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            type: BottomNavigationBarType.fixed,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.abc), label: '탭 1'),
+              BottomNavigationBarItem(icon: Icon(Icons.add), label: '탭 2'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.abc_outlined), label: '탭 3'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.abc_rounded), label: '탭 4'),
+            ],
+          ),
+        ),
         body: tempScreen(),
       ),
     );
   }
 }
 
-class tempScreen extends StatefulWidget {
+class tempScreen extends StatelessWidget {
   const tempScreen({Key? key}) : super(key: key);
 
   @override
-  State<tempScreen> createState() => _tempScreenState();
-}
-
-class _tempScreenState extends State<tempScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController controller;
-  late final Animation<double> animation;
-  bool showFirstWidget = true;
-
-  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Center(
-          child: ElevatedButton(
-            child: Text('담페이지'),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => BackDropScreen(),
-              ));
-            },
-          ),
-        ),
-        SizedBox(
-          height: 200,
-        ),
-        AnimatedBuilder(
-          animation: animation,
-          builder: (BuildContext context, Widget? child) {
-            return Transform.rotate(
-              angle: animation.value,
-              child: child,
-            );
-          },
-          child: SizedBox(
-            height: 300,
-            child: Align(
-              heightFactor: 2.0,
-              widthFactor: 2.0,
-              alignment: Alignment(0.5, 1.0),
-              child: Image.asset(
-                'assets/images/hi.png',
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 30,
-          child: Column(
-            children: [
-              Text('위에 있는 위젯임다'),
-              AnimatedCrossFade(
-                duration: Duration(seconds: 1),
-                firstChild: SizedBox(height: 300,child: Text('첫번 째 위젯임다')),
-                secondChild: Text('두번 째 위젯임다'),
-                crossFadeState: showFirstWidget
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                // 위젯 크키가 다를 때 이런 방식도 가능, 이건 안써도됨
-                layoutBuilder:
-                    (firstWidget, firstKey, secondWidget, secondKey) {
-                  return Stack(
-                    children: [
-                      Positioned(key: secondKey, child: secondWidget),
-                      Positioned(key: firstKey, child: firstWidget),
-                    ],
-                  );
-                },
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    showFirstWidget = !showFirstWidget;
-                  });
-                },
-                child: Text('위젯 바꾸기'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      duration: Duration(seconds: 3),
-      vsync: this,
-    );
-    animation = Tween(begin: 0.0, end: 2.0 * pi).animate(controller);
-    controller.forward();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-}
-
-class TestList extends StatelessWidget {
-  final String text;
-
-  const TestList({required this.text, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    print('빌드됨 $text');
     return Container(
-      color: Colors.orange,
-      child: Text(text),
+      color: Colors.indigoAccent,
+      child: Center(child: Text('템프 스크린')),
     );
   }
 }
