@@ -32,24 +32,127 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        extendBody: true,
-        bottomNavigationBar: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.abc), label: '탭 1'),
-              BottomNavigationBarItem(icon: Icon(Icons.add), label: '탭 2'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.abc_outlined), label: '탭 3'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.abc_rounded), label: '탭 4'),
-            ],
-          ),
-        ),
-        body: tempScreen(),
+        body: GridTileWidget(),
       ),
+    );
+  }
+}
+
+class GridTileWidget extends StatelessWidget {
+  const GridTileWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Table",
+              textScaleFactor: 2,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Table(
+              textDirection: TextDirection.rtl,
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder.all(width: 2.0, color: Colors.black12),
+              children: [
+                const TableRow(
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                    ),
+                    children: [
+                      TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.middle,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            "Name",
+                            style: TextStyle(color: Colors.white),
+                            textScaleFactor: 1.1,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.middle,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            "Number",
+                            style: TextStyle(color: Colors.white),
+                            textScaleFactor: 1.1,
+                          ),
+                        ),
+                      ),
+                      TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.middle,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            "Grade",
+                            style: TextStyle(color: Colors.white),
+                            textScaleFactor: 1.1,
+                          ),
+                        ),
+                      ),
+                    ]),
+                ...List.generate(
+                    7,
+                    (index) => const TableRow(children: [
+                          TableCell(
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Name",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black12),
+                                textScaleFactor: 1,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Number",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black12),
+                                textScaleFactor: 1,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Grade",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black12),
+                                textScaleFactor: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                    ),
+                )
+              ],
+            ),
+          ),
+        ],
+      )),
     );
   }
 }

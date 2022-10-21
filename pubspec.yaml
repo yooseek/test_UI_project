@@ -37,6 +37,13 @@ dependencies:
   rxdart: ^0.27.5
   flutter_hooks: ^0.18.5+1
 
+  dio: ^4.0.6
+  dio_cache_interceptor: ^3.2.7
+  dio_cache_interceptor_hive_store: ^3.1.1
+  freezed_annotation: ^2.2.0
+  json_annotation: ^4.5.0
+  path_provider: ^2.0.10
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -47,6 +54,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  build_runner: ^2.1.11
+  freezed: ^2.2.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
