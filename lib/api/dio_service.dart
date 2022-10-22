@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:test_ui_project/const/data.dart';
+import 'package:test_ui_project/models/response_model.dart';
 
 class DioService{
   /// An instance of [Dio] for executing network requests.

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:test_ui_project/component/animation/rotate_animation_widget.dart';
 import 'package:test_ui_project/screen/back_drop_screen.dart';
 import 'package:test_ui_project/screen/login_ui_screen.dart';
@@ -32,142 +33,96 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: GridTileWidget(),
+        body: TempScreen(),
       ),
     );
   }
 }
 
-class GridTileWidget extends StatelessWidget {
-  const GridTileWidget({Key? key}) : super(key: key);
+class TempScreen extends StatefulWidget {
+  const TempScreen({Key? key}) : super(key: key);
+
+  @override
+  State<TempScreen> createState() => _TempScreenState();
+}
+
+class _TempScreenState extends State<TempScreen> with SingleTickerProviderStateMixin{
+  // late final StreamSubscription<AccelerometerEvent> accelerometerListener;
+  // late final StreamSubscription<UserAccelerometerEvent> userAccelerometerListener;
+  // late final StreamSubscription<GyroscopeEvent> gyroscopeListener;
+  // late final StreamSubscription<MagnetometerEvent> magnetometerListener;
+
+  late final AnimationController testAnimation;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return SingleChildScrollView(
+      child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Table",
-              textScaleFactor: 2,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+          SizedBox(height: 200,),
+          Container(
+            color: Colors.indigoAccent.withOpacity(0.2),
+            child: Center(child: Text('템프 스크린')),
           ),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Table(
-              textDirection: TextDirection.rtl,
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              border: TableBorder.all(width: 2.0, color: Colors.black12),
-              children: [
-                const TableRow(
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey,
-                    ),
-                    children: [
-                      TableCell(
-                        verticalAlignment: TableCellVerticalAlignment.middle,
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Name",
-                            style: TextStyle(color: Colors.white),
-                            textScaleFactor: 1.1,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      TableCell(
-                        verticalAlignment: TableCellVerticalAlignment.middle,
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Number",
-                            style: TextStyle(color: Colors.white),
-                            textScaleFactor: 1.1,
-                          ),
-                        ),
-                      ),
-                      TableCell(
-                        verticalAlignment: TableCellVerticalAlignment.middle,
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Grade",
-                            style: TextStyle(color: Colors.white),
-                            textScaleFactor: 1.1,
-                          ),
-                        ),
-                      ),
-                    ]),
-                ...List.generate(
-                    7,
-                    (index) => const TableRow(children: [
-                          TableCell(
-                            verticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Name",
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.black12),
-                                textScaleFactor: 1,
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            verticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Number",
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.black12),
-                                textScaleFactor: 1,
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            verticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Grade",
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.black12),
-                                textScaleFactor: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                    ),
-                )
-              ],
-            ),
+          Flow(
+            delegate: MyFlowDelegate(testAnimation),
+            children: [
+              Icon(Icons.abc),
+              Icon(Icons.access_alarm),
+            ],
           ),
         ],
-      )),
+      ),
     );
   }
-}
-
-class tempScreen extends StatelessWidget {
-  const tempScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.indigoAccent,
-      child: Center(child: Text('템프 스크린')),
+  void initState() {
+    super.initState();
+    // accelerometerEvents.listen((AccelerometerEvent event) {
+    //   print(event);
+    // });
+    // userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    //   print(event);
+    // });
+    // gyroscopeEvents.listen((GyroscopeEvent event) {
+    //   print(event);
+    // });
+    // magnetometerEvents.listen((MagnetometerEvent event) {
+    //   print(event);
+    // });
+
+    testAnimation = AnimationController(
+        duration: const Duration(seconds: 2),
+        vsync: this
     );
   }
 }
+
+class MyFlowDelegate extends FlowDelegate {
+  MyFlowDelegate(this.animation) :super(repaint: animation);
+  final Animation<double> animation;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    context.paintChild(0,transform: Matrix4.identity());
+    context.paintChild(1,
+        transform: Matrix4.translationValues(0, 50, 0));
+
+    for(int i =0; i<context.childCount ; i++) {
+      final offset = i*animation.value * 50;
+      context.paintChild(i,
+        transform: Matrix4.translationValues(-offset, -offset, 0),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(MyFlowDelegate oldDelegate) {
+    return animation != oldDelegate.animation;
+  }
+}
+
 
 class RXScreen extends HookWidget {
   const RXScreen({Key? key}) : super(key: key);

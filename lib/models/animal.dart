@@ -14,6 +14,7 @@ class Animal extends Thing{
     required super.name,
   });
 
+
   @override
   String toString() {
     return 'Animal{name : $name, type: $type}';
@@ -32,4 +33,6 @@ class Animal extends Thing{
       type: map['type'] as AnimalType,
     );
   }
+
+
 }
