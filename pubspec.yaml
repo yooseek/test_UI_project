@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   rxdart: ^0.27.5
   flutter_hooks: ^0.18.5+1
+  provider: ^6.0.4
 
   dio: ^4.0.6
   dio_cache_interceptor: ^3.2.7
@@ -45,6 +46,8 @@ dependencies:
   path_provider: ^2.0.10
 
   sensors_plus: ^2.0.1
+
+  socket_io_client: ^2.0.0
 
 dev_dependencies:
   flutter_test:

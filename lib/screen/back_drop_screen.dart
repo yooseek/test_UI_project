@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:test_ui_project/component/animation/fade_animation_widget.dart';
+import 'package:collection/collection.dart' as collection;
 
 class BackDropScreen extends StatelessWidget {
   const BackDropScreen({Key? key}) : super(key: key);
@@ -256,7 +257,7 @@ class AppBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double normalStrength = clampDouble(strength, 0, 1);
+    final double normalStrength = strength.clamp(0, 1);
 
     return BackdropFilter(
       filter: ImageFilter.blur(
@@ -264,4 +265,5 @@ class AppBackdrop extends StatelessWidget {
       child: child ?? const SizedBox.expand(),
     );
   }
+
 }
