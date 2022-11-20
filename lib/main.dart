@@ -8,9 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:test_ui_project/bloc/users_bloc.dart';
+import 'package:test_ui_project/mixin/stf_mixin.dart';
 import 'package:test_ui_project/models/band.dart';
 import 'package:test_ui_project/provider/socket_provider.dart';
 
@@ -24,19 +27,213 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SocketProvider()),
-      ],
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => UsersBloc())],
       child: MaterialApp(
-        //showSemanticsDebugger: true,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: TempScreen(),
+        theme: ThemeData(useMaterial3: true),
+        home: UsersScreen(),
       ),
     );
+  }
+}
+
+class UsersScreen extends StatelessWidget {
+  const UsersScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<UsersBloc, UsersState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: Center(
+              child: SingleChildScrollView(
+            child: Column(
+              children: [
+                for (int i = 0; i < state.users.length; i++)
+                  ListTile(
+                    title: Text(state.users[i].name),
+                  ),
+                ElevatedButton(
+                    onPressed: () {
+                      BlocProvider.of<UsersBloc>(context)
+                          .add(AddUserEvent(user: User(id: 1, name: 'user1')));
+                    },
+                    child: Text('Input User')),
+              ],
+            ),
+          )),
+        );
+      },
+    );
+  }
+}
+
+class PageScreen extends StatefulWidget {
+  const PageScreen({Key? key}) : super(key: key);
+
+  @override
+  State<PageScreen> createState() => _PageScreenState();
+}
+
+class _PageScreenState extends State<PageScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 1));
+
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 300,
+            width: 300,
+            color: Colors.blue,
+            child: CustomPaint(
+              painter: AnimatedPathPainter(controller),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AnimatedPathPainter extends CustomPainter {
+  final Animation<double> _animation;
+
+  AnimatedPathPainter(this._animation) : super(repaint: _animation);
+
+  Path extractPathUntilLength(
+    Path originalPath,
+    double length,
+  ) {
+    var currentLength = 0.0;
+
+    final path = new Path();
+
+    var metricsIterator = originalPath.computeMetrics().iterator;
+
+    while (metricsIterator.moveNext()) {
+      var metric = metricsIterator.current;
+
+      var nextLength = currentLength + metric.length;
+
+      final isLastSegment = nextLength > length;
+      if (isLastSegment) {
+        final remainingLength = length - currentLength;
+        final pathSegment = metric.extractPath(0.0, remainingLength);
+
+        path.addPath(pathSegment, Offset.zero);
+        break;
+      } else {
+        // There might be a more efficient way of extracting an entire path
+        final pathSegment = metric.extractPath(0.0, metric.length);
+        path.addPath(pathSegment, Offset.zero);
+      }
+
+      currentLength = nextLength;
+    }
+
+    return path;
+  }
+
+  Path createAnimatedPath(
+    Path originalPath,
+    double animationPercent,
+  ) {
+    // ComputeMetrics can only be iterated once!
+    final totalLength = originalPath
+        .computeMetrics()
+        .fold(0.0, (double prev, PathMetric metric) => prev + metric.length);
+
+    final currentLength = totalLength * animationPercent;
+
+    return extractPathUntilLength(originalPath, currentLength);
+  }
+
+  Path _createAnyPath(Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    /// 이곳에 커스텀 ClipPath 작성
+    return Path()
+      ..lineTo(0, h * 0.3)
+      ..quadraticBezierTo(w * 0.3, h * 0.7, w * 0.6, h * 0.4)
+      ..quadraticBezierTo(w * 0.8, h * 0.7, w, h)
+      ..lineTo(w, 0)
+      ..lineTo(0, 0);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final animationPercent = _animation.value;
+
+    final path = createAnimatedPath(_createAnyPath(size), animationPercent);
+
+    final Paint paint = Paint();
+    paint.color = Colors.amberAccent;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 10.0;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class CustomClipPath extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    final path = Path();
+
+    // 1번 점 (0,0)
+    // path.lineTo(0, h); // 2번 점 (0,h)
+    // path.quadraticBezierTo(w * 0.5, h - 100, w, h); // 3번점(w*0.5,h-100) 호 그리기
+    // path.lineTo(w, h); // 4번 점 (w,h)
+    // path.lineTo(w, 0); // 5번 점 (w,0)
+    // path.close(); // 선그리기 종료
+    //
+    // // 1번 점 (0,0)
+    // path.lineTo(0, h-100); // 2번 점 (0,h)
+    // path.quadraticBezierTo(w * 0.5, h, w, h-100); // 3번점(w*0.5,h) 호 그리기
+    // path.lineTo(w, h); // 4번 점 (w,h)
+    // path.lineTo(w, 0); // 5번 점 (w,0)
+    // path.close(); // 선그리기 종료
+
+    path.moveTo(0, h * 0.1);
+    path.lineTo(0, h / 2);
+    path.cubicTo(w * 0.5, h, w * 0.7, h * 0.6, w, h);
+    path.lineTo(w, 0);
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return true;
   }
 }
 
@@ -199,9 +396,10 @@ class _TempScreenState extends State<TempScreen>
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController()..addListener(() {
-      _scrollPos.value = scrollController.position.pixels;
-    });
+    scrollController = ScrollController()
+      ..addListener(() {
+        _scrollPos.value = scrollController.position.pixels;
+      });
   }
 
   @override
@@ -214,14 +412,14 @@ class _TempScreenState extends State<TempScreen>
           },
           child: Text('앱바'),
         ),
-        title:  ValueListenableBuilder<double>(
+        title: ValueListenableBuilder<double>(
           valueListenable: _scrollPos,
           builder: (_, value, child) {
             // get some value between 0 and 1, based on the amt scrolled
             double opacity = (1 - value / 150).clamp(0, 1);
             return Opacity(opacity: opacity, child: child);
           },
-            child: Text('타이틀입니다'),
+          child: Text('타이틀입니다'),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -274,7 +472,7 @@ class _TempScreenState extends State<TempScreen>
                       ),
                     ),
                   ),
-                  ignoring: true,
+                  ignoring: false,
                 ),
                 SliverToBoxAdapter(
                   child: Column(
@@ -288,11 +486,11 @@ class _TempScreenState extends State<TempScreen>
                 ),
               ],
             ),
-            AbsorbPointer(
-              child: Container(
-                height: 500,
-              ),
-            ),
+            // AbsorbPointer(
+            //   child: Container(
+            //     height: 500,
+            //   ),
+            // ),
           ],
         ),
       ),

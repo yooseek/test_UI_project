@@ -48,6 +48,9 @@ dependencies:
   sensors_plus: ^2.0.1
 
   socket_io_client: ^2.0.0
+  bloc:
+  flutter_bloc:
+  equatable:
 
 dev_dependencies:
   flutter_test:

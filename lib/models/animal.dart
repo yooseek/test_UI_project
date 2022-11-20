@@ -33,6 +33,4 @@ class Animal extends Thing{
       type: map['type'] as AnimalType,
     );
   }
-
-
 }
