@@ -16,6 +16,7 @@ import 'package:test_ui_project/bloc/users_bloc.dart';
 import 'package:test_ui_project/mixin/stf_mixin.dart';
 import 'package:test_ui_project/models/band.dart';
 import 'package:test_ui_project/provider/socket_provider.dart';
+import 'package:test_ui_project/provider/users_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,8 +28,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [BlocProvider(create: (context) => UsersBloc())],
+    return MultiProvider(
+      providers: [
+        BlocProvider(create: (context) => UsersBloc()),
+        ChangeNotifierProvider(create: (context) => UsersProvider(users: [])),
+      ],
       child: MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: UsersScreen(),
@@ -44,24 +48,41 @@ class UsersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UsersBloc, UsersState>(
       builder: (context, state) {
+        final users = Provider.of<UsersProvider>(context,listen: true).users;
+        final usersProvider = Provider.of<UsersProvider>(context);
+
+        print(usersProvider.users);
+        usersProvider.users = [];
+        print(usersProvider.users);
+
         return Scaffold(
           body: Center(
-              child: SingleChildScrollView(
-            child: Column(
-              children: [
-                for (int i = 0; i < state.users.length; i++)
-                  ListTile(
-                    title: Text(state.users[i].name),
-                  ),
-                ElevatedButton(
-                    onPressed: () {
-                      BlocProvider.of<UsersBloc>(context)
-                          .add(AddUserEvent(user: User(id: 1, name: 'user1')));
-                    },
-                    child: Text('Input User')),
-              ],
+                child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (int i = 0; i < state.users.length; i++)
+                    ListTile(
+                      title: Text(state.users[i].name),
+                    ),
+                  for (int i = 0; i < users.length; i++)
+                    ListTile(
+                      title: Text(users[i].name),
+                    ),
+                  ElevatedButton(
+                      onPressed: () {
+                        BlocProvider.of<UsersBloc>(context)
+                            .add(AddUserEvent(user: User(id: 1, name: 'User - bloc')));
+                      },
+                      child: Text('Input User - Bloc')),
+                  ElevatedButton(
+                      onPressed: () {
+                        Provider.of<UsersProvider>(context,listen: false).addUser(User(id: 2, name: 'User - provider'));
+                      },
+                      child: Text('Input User - Provider')),
+                ],
+              ),
             ),
-          )),
+          ),
         );
       },
     );

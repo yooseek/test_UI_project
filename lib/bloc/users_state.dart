@@ -1,9 +1,9 @@
 part of 'users_bloc.dart';
 
-class UsersState extends Equatable {
-  final List<User> users;
+class UsersState{
+   List<User> users;
 
-  const UsersState({required this.users});
+   UsersState({required this.users});
 
   factory UsersState.init() {
     return UsersState(users: []);
@@ -16,10 +16,6 @@ class UsersState extends Equatable {
       users: users ?? this.users,
     );
   }
-
-  @override
-  List<Object> get props => [users];
-
 }
 
 class User {

@@ -12,12 +12,15 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   }
 
   Future<void> _onAddUserEvent (AddUserEvent event, Emitter emit) async {
-    // final currentUsers = state.users..add(event.user);
+    final currentUsers = state;
+    currentUsers.users = [...state.users, event.user];
 
-    final currentUsers = [...state.users, event.user];
+    // final currentUsers = [...state.users, event.user];
 
-    print(currentUsers);
+    // print(currentUsers);
+    print(currentUsers.users);
 
-    emit(state.copyWith(users: currentUsers));
+    emit(currentUsers);
+    // emit(state.copyWith(users: currentUsers));
   }
 }
