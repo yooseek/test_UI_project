@@ -1,18 +1,27 @@
 import 'dart:async';
-import 'dart:isolate';
-import 'dart:math';
+import 'dart:convert';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart';
+import 'package:http/http.dart' as http;
 import 'dart:ui' hide Path;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share/share.dart';
+import 'package:test_ui_project/api/retrofit_service.dart';
 import 'package:test_ui_project/models/band.dart';
 import 'package:test_ui_project/provider/socket_provider.dart';
+import 'package:test_ui_project/screen/bootpay_perchase_screen.dart';
+import 'package:test_ui_project/screen/bootpay_screen.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,160 +33,140 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SocketProvider()),
-      ],
-      child: MaterialApp(
-        //showSemanticsDebugger: true,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: TempScreen(),
+    return MaterialApp(
+      //showSemanticsDebugger: true,
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+      ),
+      // home: const MyHomePage(title: '스크린 샷 테스트입니다',),
+      home: SettingView(),
+    );
+  }
+}
+
+class SettingView extends StatelessWidget {
+  const SettingView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    const methodChannel = const MethodChannel('appSettings');
+
+    return Center(
+      child: Column(
+        children: [
+          Text('앱 세팅 열기'),
+          ElevatedButton(onPressed: () async {
+            try {
+              methodChannel.invokeMethod('noti');
+            } on PlatformException catch (e) {
+              print(e);
+            }
+          }, child: Text('알림 세팅 열기'))
+        ],
       ),
     );
   }
 }
 
-class SocketScreen extends StatelessWidget {
-  const SocketScreen({Key? key}) : super(key: key);
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  final String title;
 
   @override
-  Widget build(BuildContext context) {
-    final socketService = Provider.of<SocketProvider>(context);
-    // socketService.socket.emit(event);
-
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: SizedBox(
-            height: 200,
-          ),
-        ),
-        SliverToBoxAdapter(
-            child: ServerStatusWidget(socketService: socketService)),
-        SliverToBoxAdapter(child: EmitWidget(socketService: socketService)),
-        PayloadListWidget(),
-      ],
-    );
-  }
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class PayloadListWidget extends StatefulWidget {
-  const PayloadListWidget({
-    Key? key,
-  }) : super(key: key);
+class _MyHomePageState extends State<MyHomePage> {
+  final _screenShotController = ScreenshotController();
+  int _counter = 0;
 
-  @override
-  State<PayloadListWidget> createState() => _PayloadListWidgetState();
-}
-
-class _PayloadListWidgetState extends State<PayloadListWidget> {
-  List<Band> bands = [];
-
-  @override
-  Widget build(BuildContext context) {
-    final socketService = Provider.of<SocketProvider>(context);
-
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: bands.length,
-        (context, index) {
-          return Dismissible(
-            key: Key(bands[index].id),
-            onDismissed: (direction) {
-              socketService.socket.emit('delete-band', {'id': bands[index].id});
-            },
-            child: ListTile(
-              onTap: () {
-                socketService.socket.emit('vote-band', {'id': bands[index].id});
-              },
-              title: Text(bands[index].name),
-              trailing: Text(bands[index].votes.toString()),
-            ),
-          );
-        },
-      ),
-    );
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
   }
+
 
   @override
   void initState() {
     super.initState();
-    final socketService = Provider.of<SocketProvider>(context, listen: false);
-    socketService.socket.on('active-bands', (payload) {
-      bands = (payload as List).map((e) => Band.fromMap(e)).toList();
-      setState(() {});
-    });
+    test();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    final socketService = Provider.of<SocketProvider>(context, listen: false);
-    socketService.socket.off('active-bands');
-  }
+  test() async {
+    final httpService = RetrofitService(Dio());
+    final response = await compute(httpService.getChangeNumberCheck,"01050043394");
+
+    print(response.toString());
 }
-
-class EmitWidget extends StatefulWidget {
-  const EmitWidget({
-    Key? key,
-    required this.socketService,
-  }) : super(key: key);
-
-  final SocketProvider socketService;
-
-  @override
-  State<EmitWidget> createState() => _EmitWidgetState();
-}
-
-class _EmitWidgetState extends State<EmitWidget> {
-  final TextEditingController textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        controller: textEditingController,
-        onSubmitted: (String value) {
-          // widget.socketService.emit('emitir-mensaje', {'name': value});
-          widget.socketService.emit('add-band', {'name': value});
-          textEditingController.clear();
-        },
+    return Screenshot(
+      controller: _screenShotController,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
+              Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headline4,
+              ),
+              ElevatedButton(
+                onPressed: () async {
+
+                  final box = context.findRenderObject() as RenderBox?;
+
+                  const _shareText = '공유할 텍스트'; // 스크린샷 공유일 땐 별로 노 필요
+                  final _screenshot = await _screenShotController.capture(delay: const Duration(milliseconds: 10));
+
+                  if (_screenshot != null) {
+                    // 스크린샷을 문서 디렉토리에 저장
+                    final _documentDirectoryPath = await getApplicationDocumentsDirectory();
+                    final _documentDirectoryPath2 = await getApplicationSupportDirectory();
+                    final _temporaryDirectoryPath3 = await getTemporaryDirectory();
+
+                    /// '/data/user/0/com.example.test_ui_project/app_flutter' - 해당 앱만의 저장공간이며 앱이 삭제되면 없어진다
+                    print('_documentDirectoryPath : $_documentDirectoryPath');
+                    /// '/data/user/0/com.example.test_ui_project/files'
+                    print('_documentDirectoryPath2 : $_documentDirectoryPath2');
+                    /// '/data/user/0/com.example.test_ui_project/cache' - 캐쉬같이 임시로 데이터를 저장하는 공간이고 언제든지 삭제될 수 있다
+                    print('_temporaryDirectoryPath3 : $_temporaryDirectoryPath3');
+
+                    // 해당 Path로 파일 생성하기
+                    final imagePath = await File('${_documentDirectoryPath.path}/screenshot.png').create();
+
+                    // 생성된 빈 파일에 스크린샷을 바이트로 변환해서 채워넣기
+                    await imagePath.writeAsBytes(_screenshot);
+
+                    // 스크린샷과 텍스트 공유
+                    await Share.shareFiles([imagePath.path], text: _shareText,
+                        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                    );
+                  }
+                },
+                child: const Text('스크린 샷 공유를 해봅시당'),
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _incrementCounter,
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
-  }
-}
-
-class ServerStatusWidget extends StatelessWidget {
-  const ServerStatusWidget({
-    Key? key,
-    required this.socketService,
-  }) : super(key: key);
-
-  final SocketProvider socketService;
-
-  @override
-  Widget build(BuildContext context) {
-    return socketService.serverStatus == ServiceStatus.online
-        ? const CircleAvatar(
-            backgroundColor: Colors.transparent,
-            child: Icon(
-              Icons.gpp_good,
-              color: Colors.greenAccent,
-              size: 28.0,
-            ),
-          )
-        : const CircleAvatar(
-            backgroundColor: Colors.transparent,
-            child: Icon(
-              Icons.error,
-              color: Colors.redAccent,
-              size: 28.0,
-            ),
-          );
   }
 }
 
@@ -199,9 +188,10 @@ class _TempScreenState extends State<TempScreen>
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController()..addListener(() {
-      _scrollPos.value = scrollController.position.pixels;
-    });
+    scrollController = ScrollController()
+      ..addListener(() {
+        _scrollPos.value = scrollController.position.pixels;
+      });
   }
 
   @override
@@ -212,16 +202,16 @@ class _TempScreenState extends State<TempScreen>
           onPressed: () {
             print('click');
           },
-          child: Text('앱바'),
+          child: const Text('앱바'),
         ),
-        title:  ValueListenableBuilder<double>(
+        title: ValueListenableBuilder<double>(
           valueListenable: _scrollPos,
           builder: (_, value, child) {
             // get some value between 0 and 1, based on the amt scrolled
             double opacity = (1 - value / 150).clamp(0, 1);
             return Opacity(opacity: opacity, child: child);
           },
-            child: Text('타이틀입니다'),
+          child: const Text('타이틀입니다'),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -257,7 +247,7 @@ class _TempScreenState extends State<TempScreen>
                       onPressed: () {
                         print('click');
                       },
-                      child: Text('버튼')),
+                      child: const Text('버튼')),
                   Text(a.toString()),
                 ],
               ),
@@ -305,7 +295,7 @@ class _TempScreenState extends State<TempScreen>
     //   a++;
     // }
     int result = 0;
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     print('체크 3');
     return result;
   }
@@ -327,11 +317,11 @@ class RXScreen extends HookWidget {
 
     return Column(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 200,
         ),
         StreamBuilder<String>(
-          stream: subject.stream.distinct().debounceTime(Duration(seconds: 1)),
+          stream: subject.stream.distinct().debounceTime(const Duration(seconds: 1)),
           initialData: '비어있습니다',
           builder: (context, snapshot) {
             return Text(snapshot.data.toString());
