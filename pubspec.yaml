@@ -59,6 +59,14 @@ dependencies:
   bootpay_bio:  # 생체인증 결제 사용시
   share:
   screenshot:
+  model_viewer_plus: ^1.4.0
+  flutter_cube: ^0.1.1
+#  flutter_cube:
+#    git:
+#      url: https://github.com/redDwarf03/flutter_cube.git
+#      ref: master
+
+  image_sequence_animator: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -88,6 +96,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/cube/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

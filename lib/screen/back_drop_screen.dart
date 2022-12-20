@@ -22,7 +22,7 @@ class BackDropScreen extends StatelessWidget {
                         Radius.elliptical(size.width / 2, size.height / 2)),
                 child: Hero(
                     tag: 'hi',
-                    child: Image.asset('assets/images/screen_shot.png')),
+                    child: Image.asset('assets/images/screen_shot0.png')),
               ),
             ),
             BottomList(
