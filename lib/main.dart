@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cube/flutter_cube.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
@@ -22,13 +23,19 @@ import 'package:rxdart/rxdart.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share/share.dart';
 import 'package:test_ui_project/api/retrofit_service.dart';
+import 'package:test_ui_project/bloc/tmp2_bloc.dart';
+import 'package:test_ui_project/bloc/tmp_bloc.dart';
+import 'package:test_ui_project/injection_container.dart';
 import 'package:test_ui_project/models/band.dart';
 import 'package:test_ui_project/provider/socket_provider.dart';
+import 'package:test_ui_project/repository/tmp_repo.dart';
 import 'package:test_ui_project/screen/bootpay_perchase_screen.dart';
 import 'package:test_ui_project/screen/bootpay_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-void main() {
+void main() async {
+  await initializeDependencies();
+
   runApp(const MyApp());
 }
 
@@ -60,10 +67,488 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: Scaffold(
-          appBar: AppBar(title: Text("Model Viewer")), body: Page3DContainer()),
+          appBar: AppBar(title: Text("Model Viewer")), body: tmpScreen1()),
     );
   }
 }
+
+class tmpScreen1 extends StatelessWidget {
+  const tmpScreen1({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<TmpBloc>(
+      create: (context) => serviceLocator()
+        ..add(InitTmpEvent1())
+        ..add(InitTmpEvent2()),
+      child: Scaffold(
+        body: Container(
+          child: Center(
+            child: BlocBuilder<TmpBloc, TmpState>(
+              builder: (context, state) {
+                final count = state.count;
+                final countList = state.countList;
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 120,
+                    ),
+                    Text(count.toString()),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ...countList.map((e) => Text(e.toString())).toList(),
+                    TextButton(
+                        child: Text('++'),
+                        onPressed: () =>
+                            serviceLocator<TmpBloc>().add(AddCount())),
+                    TextButton(
+                        child: Text('--'),
+                        onPressed: () =>
+                            serviceLocator<TmpBloc>().add(MinusCount())),
+                    TextButton(
+                        child: Text('tmp2'),
+                        onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => tmpScreen2()),
+                            ))
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class tmpScreen2 extends StatelessWidget {
+  const tmpScreen2({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('tmp1'),
+                  onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => tmpScreen1()),
+                      )),
+              TextButton(
+                  child: Text('tmp3'),
+                  onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => tmpScreen3()),
+                      )),
+              TextButton(
+                  child: Text('tmp4'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => tmpScreen4()),
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class tmpScreen3 extends StatelessWidget {
+  const tmpScreen3({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<TmpBloc>(
+      create: (context) => serviceLocator()
+        ..add(InitTmpEvent1())
+        ..add(InitTmpEvent2()),
+      child: Scaffold(
+        body: Container(
+          child: Center(
+            child: BlocBuilder<TmpBloc, TmpState>(
+              builder: (context, state) {
+                final count = state.count;
+                final countList = state.countList;
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 120,
+                    ),
+                    Text(count.toString()),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ...countList.map((e) => Text(e.toString())).toList(),
+                    TextButton(
+                        child: Text('++'),
+                        onPressed: () =>
+                            serviceLocator<TmpBloc>().add(AddCount())),
+                    TextButton(
+                        child: Text('--'),
+                        onPressed: () =>
+                            serviceLocator<TmpBloc>().add(MinusCount())),
+                    TextButton(
+                        child: Text('tmp2'),
+                        onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => tmpScreen2()),
+                            ))
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class tmpScreen4 extends StatelessWidget {
+  const tmpScreen4({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<Tmp2Bloc>(
+      create: (context) => serviceLocator()
+        ..add(InitTmpEvent3())
+        ..add(InitTmpEvent4()),
+      child: Scaffold(
+        body: Container(
+          child: Center(
+            child: BlocBuilder<Tmp2Bloc, Tmp2State>(
+              builder: (context, state) {
+                final count = state.count;
+                final countList = state.countList;
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 120,
+                    ),
+                    Text(count.toString()),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ...countList.map((e) => Text(e.toString())).toList(),
+                    TextButton(
+                        child: Text('++'),
+                        onPressed: () =>
+                            serviceLocator<Tmp2Bloc>().add(AddCount2())),
+                    TextButton(
+                        child: Text('--'),
+                        onPressed: () =>
+                            serviceLocator<Tmp2Bloc>().add(MinusCount2())),
+                    TextButton(
+                        child: Text('tmp2'),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => tmpScreen2()),
+                        ))
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomPage3DContainer extends StatefulWidget {
+  const CustomPage3DContainer({Key? key}) : super(key: key);
+
+  @override
+  State<CustomPage3DContainer> createState() => _CustomPage3DContainerState();
+}
+
+class _CustomPage3DContainerState extends State<CustomPage3DContainer>
+    with SingleTickerProviderStateMixin {
+  var _maxSlide = 0.75;
+  var _extraHeight = 0.1;
+  late double _startingPos;
+  var _drawerVisible = false;
+  late AnimationController _animationController;
+  Size _screen = Size(0, 0);
+  late CurvedAnimation _animator;
+  late CurvedAnimation _objAnimator;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+    );
+    _animator = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOutQuad,
+      reverseCurve: Curves.easeInQuad,
+    );
+    _objAnimator = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeIn,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    _screen = MediaQuery.of(context).size;
+    _maxSlide *= _screen.width;
+    _extraHeight *= _screen.height;
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragStart: _onDragStart,
+      onHorizontalDragUpdate: _onDragUpdate,
+      onHorizontalDragEnd: _onDragEnd,
+      child: Stack(
+        children: [
+          // Container(color: Color(0xFFaaa598)),
+          _buildFirstContainer(),
+          _buildSecondContainer(),
+          _build3DText(),
+        ],
+      ),
+    );
+  }
+
+  _buildFirstContainer() => Positioned.fill(
+        top: -_extraHeight,
+        bottom: -_extraHeight,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (context, widget) => Transform.translate(
+            offset: Offset(_maxSlide * _animator.value, 0),
+
+            /// 이 부분이 핵심
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY((pi / 2 + 0.1) * -_animator.value),
+              alignment: Alignment.centerLeft,
+              child: widget,
+            ),
+          ),
+          child: Container(
+            color: Color(0xffe8dfce),
+            child: Stack(
+              children: <Widget>[
+                AnimatedBuilder(
+                  animation: _animator,
+                  builder: (_, __) => Container(
+                      color: Colors.black.withOpacity(
+                          _maxSlide * (_animator.value / _screen.width))),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  _buildSecondContainer() => Positioned.fill(
+        top: -_extraHeight,
+        bottom: -_extraHeight,
+        left: 0,
+        right: _screen.width - _maxSlide,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (context, widget) {
+            return Transform.translate(
+              offset: Offset(_maxSlide * (_animator.value - 1), 0),
+
+              /// 이 부분이 핵심
+              child: Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(pi * (1 - _animator.value) / 2),
+                alignment: Alignment.centerRight,
+                child: widget,
+              ),
+            );
+          },
+          child: Container(
+            color: Color(0xffe8dfce),
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 5,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.transparent, Colors.black12],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  top: _extraHeight,
+                  bottom: _extraHeight,
+                  child: SafeArea(
+                    child: Container(
+                      width: _maxSlide,
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Container(
+                                  width: 25,
+                                  height: 25,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.black26,
+                                      width: 4,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Transform.translate(
+                                  offset: Offset(-15, 0),
+                                  child: Text(
+                                    "Text",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      backgroundColor: Color(0xffe8dfce),
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _animator,
+                  builder: (_, __) => Container(
+                      width: _maxSlide,
+                      color: Colors.black.withOpacity(
+                          (1 - _maxSlide * (_animator.value / _screen.width)) -
+                              0.2)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  _build3DText() => Positioned(
+        top: 0,
+        bottom: 50,
+        left: 0,
+        right: 0,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (_, widget) => Opacity(
+            opacity: 1 - _animator.value,
+            child: Transform.translate(
+              offset: Offset((_maxSlide + 50) * _animator.value, 0),
+              child: Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY((pi / 2 + 0.1) * -_animator.value),
+                alignment: Alignment.centerLeft,
+                child: widget,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  "여기에\n텍스트를\n입력하세요",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      "추가",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Icon(Icons.keyboard_arrow_down),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  void _onDragStart(DragStartDetails details) {
+    _startingPos = details.globalPosition.dx;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    final globalDelta = details.globalPosition.dx - _startingPos;
+
+    if (globalDelta > 0) {
+      /// 왼쪽에서 오른쪽으로 드래그 할때
+      final pos = globalDelta / _screen.width;
+      if (_drawerVisible && pos <= 1.0) return;
+      _animationController.value = pos;
+    } else {
+      /// 오른쪽에서 왼쪽으로 드래그 할때
+      /// 화면을 드래그한 포지션 비율
+      final pos = 1 - (globalDelta.abs() / _screen.width);
+      if (!_drawerVisible && pos >= 0.0) return;
+      _animationController.value = pos;
+    }
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    /// 1초에 좌우로 500 픽셀 이상을 한번에 드래그 했을 때
+    if (details.velocity.pixelsPerSecond.dx.abs() > 500) {
+      /// 왼쪽에서 오른쪽으로 드래그 되었을 때
+      if (details.velocity.pixelsPerSecond.dx > 0) {
+        _animationController.forward(from: _animationController.value);
+        _drawerVisible = true;
+      } else {
+        /// 오른쪽에서 왼쪽으로 드래그 되었을 때
+        _animationController.reverse(from: _animationController.value);
+        _drawerVisible = false;
+      }
+      return;
+    }
+
+    /// 1초에 좌우로 500픽셀 이상 빠르게 드래그 하지 않았을 때 (애니메이션이 중간일때)
+    if (_animationController.value > 0.5) {
+      {
+        _animationController.forward(from: _animationController.value);
+        _drawerVisible = true;
+      }
+    } else {
+      {
+        _animationController.reverse(from: _animationController.value);
+        _drawerVisible = false;
+      }
+    }
+  }
+}
+
 class Page3DContainer extends StatefulWidget {
   const Page3DContainer({Key? key}) : super(key: key);
 
@@ -71,8 +556,8 @@ class Page3DContainer extends StatefulWidget {
   State<Page3DContainer> createState() => _Page3DContainerState();
 }
 
-class _Page3DContainerState extends State<Page3DContainer> with SingleTickerProviderStateMixin {
-
+class _Page3DContainerState extends State<Page3DContainer>
+    with SingleTickerProviderStateMixin {
   var _maxSlide = 0.75;
   var _extraHeight = 0.1;
   late double _startingPos;
@@ -152,7 +637,6 @@ class _Page3DContainerState extends State<Page3DContainer> with SingleTickerProv
   void _onDragEnd(DragEndDetails details) {
     /// 1초에 좌우로 500 픽셀 이상을 한번에 드래그 했을 때
     if (details.velocity.pixelsPerSecond.dx.abs() > 500) {
-
       /// 왼쪽에서 오른쪽으로 드래그 되었을 때
       if (details.velocity.pixelsPerSecond.dx > 0) {
         _animationController.forward(from: _animationController.value);
@@ -164,6 +648,7 @@ class _Page3DContainerState extends State<Page3DContainer> with SingleTickerProv
       }
       return;
     }
+
     /// 1초에 좌우로 500픽셀 이상 빠르게 드래그 하지 않았을 때 (애니메이션이 중간일때)
     if (_animationController.value > 0.5) {
       {
@@ -219,320 +704,319 @@ class _Page3DContainerState extends State<Page3DContainer> with SingleTickerProv
   }
 
   _buildBackground() => Positioned.fill(
-    top: -_extraHeight,
-    bottom: -_extraHeight,
-    child: AnimatedBuilder(
-      animation: _animator,
-      builder: (context, widget) => Transform.translate(
-        offset: Offset(_maxSlide * _animator.value, 0),
-        child: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateY((pi / 2 + 0.1) * -_animator.value),
-          alignment: Alignment.centerLeft,
-          child: widget,
-        ),
-      ),
-      child: Container(
-        color: Color(0xffe8dfce),
-        child: Stack(
-          children: <Widget>[
-            //Fender word
-            Positioned(
-              top: _extraHeight + 0.1 * _screen.height,
-              left: 80,
-              child: Transform.rotate(
-                angle: 90 * (pi / 180),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "FENDER",
-                  style: TextStyle(
-                    fontSize: 100,
-                    color: Color(0xFFc7c0b2),
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        blurRadius: 5,
-                        offset: Offset(2.0, 0.0),
+        top: -_extraHeight,
+        bottom: -_extraHeight,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (context, widget) => Transform.translate(
+            offset: Offset(_maxSlide * _animator.value, 0),
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY((pi / 2 + 0.1) * -_animator.value),
+              alignment: Alignment.centerLeft,
+              child: widget,
+            ),
+          ),
+          child: Container(
+            color: Color(0xffe8dfce),
+            child: Stack(
+              children: <Widget>[
+                //Fender word
+                Positioned(
+                  top: _extraHeight + 0.1 * _screen.height,
+                  left: 80,
+                  child: Transform.rotate(
+                    angle: 90 * (pi / 180),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "FENDER",
+                      style: TextStyle(
+                        fontSize: 100,
+                        color: Color(0xFFc7c0b2),
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            offset: Offset(2.0, 0.0),
+                          ),
+                        ],
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+                // Shadow
+                Positioned(
+                  top: _extraHeight + 0.13 * _screen.height,
+                  bottom: _extraHeight + 0.24 * _screen.height,
+                  left: _maxSlide - 0.41 * _screen.width,
+                  right: _screen.width * 1.06 - _maxSlide,
+                  child: Column(
+                    children: <Widget>[
+                      Flexible(
+                        child: FractionallySizedBox(
+                          widthFactor: 0.2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 50,
+                                  color: Colors.black38,
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 50,
+                                color: Colors.black26,
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
                       ),
                     ],
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _animator,
+                  builder: (_, __) => Container(
+                    color: Colors.black.withAlpha(
+                      (150 * _animator.value).floor(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  _buildDrawer() => Positioned.fill(
+        top: -_extraHeight,
+        bottom: -_extraHeight,
+        left: 0,
+        right: _screen.width - _maxSlide,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (context, widget) {
+            return Transform.translate(
+              offset: Offset(_maxSlide * (_animator.value - 1), 0),
+              child: Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(pi * (1 - _animator.value) / 2),
+                alignment: Alignment.centerRight,
+                child: widget,
+              ),
+            );
+          },
+          child: Container(
+            color: Color(0xffe8dfce),
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 5,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.transparent, Colors.black12],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  top: _extraHeight,
+                  bottom: _extraHeight,
+                  child: SafeArea(
+                    child: Container(
+                      width: _maxSlide,
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Container(
+                                  width: 25,
+                                  height: 25,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.black26,
+                                      width: 4,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Transform.translate(
+                                  offset: Offset(-15, 0),
+                                  child: Text(
+                                    "STRING",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      backgroundColor: Color(0xffe8dfce),
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                _buildMenuItem("Guitars", active: true),
+                                _buildMenuItem("Basses"),
+                                _buildMenuItem("Amps"),
+                                _buildMenuItem("Pedals"),
+                                _buildMenuItem("Others"),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                _buildFooterMenuItem("About"),
+                                _buildFooterMenuItem("Support"),
+                                _buildFooterMenuItem("Terms"),
+                                _buildFooterMenuItem("Faqs"),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _animator,
+                  builder: (_, __) => Container(
+                    width: _maxSlide,
+                    color: Colors.black.withAlpha(
+                      (150 * (1 - _animator.value)).floor(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  _build3dObject() => Positioned(
+        top: 0.1 * _screen.height,
+        bottom: 0.22 * _screen.height,
+        left: _maxSlide - _screen.width * 0.5,
+        right: _screen.width * 0.85 - _maxSlide,
+        child: AnimatedBuilder(
+          animation: _objAnimator,
+          builder: (_, __) => ImageSequenceAnimator(
+            "assets/guitarSequence", //folderName
+            "", //fileName
+            1, //suffixStart
+            4, //suffixCount
+            "png", //fileFormat
+            120, //frameCount
+            fps: 60,
+            isLooping: false,
+            isBoomerang: true,
+            isAutoPlay: false,
+          ),
+        ),
+      );
+
+  _buildHeader() => SafeArea(
+        child: AnimatedBuilder(
+            animation: _animator,
+            builder: (_, __) {
+              return Transform.translate(
+                offset: Offset((_screen.width - 60) * _animator.value, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: InkWell(
+                        onTap: _toggleDrawer,
+                        child: Icon(Icons.menu),
+                      ),
+                    ),
+                    Opacity(
+                      opacity: 1 - _animator.value,
+                      child: Text(
+                        "PRODUCT DETAIL",
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    SizedBox(width: 50, height: 50),
+                  ],
+                ),
+              );
+            }),
+      );
+
+  _buildOverlay() => Positioned(
+        top: 0,
+        bottom: 50,
+        left: 0,
+        right: 0,
+        child: AnimatedBuilder(
+          animation: _animator,
+          builder: (_, widget) => Opacity(
+            opacity: 1 - _animator.value,
+            child: Transform.translate(
+              offset: Offset((_maxSlide + 50) * _animator.value, 0),
+              child: Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY((pi / 2 + 0.1) * -_animator.value),
+                alignment: Alignment.centerLeft,
+                child: widget,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text(
+                  "Fender\nAmerican\nElite Strat",
+                  style: TextStyle(
+                    fontSize: 30,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
-            ),
-            // Shadow
-            Positioned(
-              top: _extraHeight + 0.13 * _screen.height,
-              bottom: _extraHeight + 0.24 * _screen.height,
-              left: _maxSlide - 0.41 * _screen.width,
-              right: _screen.width * 1.06 - _maxSlide,
-              child: Column(
-                children: <Widget>[
-                  Flexible(
-                    child: FractionallySizedBox(
-                      widthFactor: 0.2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 50,
-                              color: Colors.black38,
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      "SPEC",
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  Flexible(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 50,
-                            color: Colors.black26,
-                          )
-                        ],
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            AnimatedBuilder(
-              animation: _animator,
-              builder: (_, __) => Container(
-                color: Colors.black.withAlpha(
-                  (150 * _animator.value).floor(),
+                    Icon(Icons.keyboard_arrow_down),
+                  ],
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  _buildDrawer() => Positioned.fill(
-    top: -_extraHeight,
-    bottom: -_extraHeight,
-    left: 0,
-    right: _screen.width - _maxSlide,
-    child: AnimatedBuilder(
-      animation: _animator,
-      builder: (context, widget) {
-        return Transform.translate(
-          offset: Offset(_maxSlide * (_animator.value - 1), 0),
-          child: Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(pi * (1 - _animator.value) / 2),
-            alignment: Alignment.centerRight,
-            child: widget,
-          ),
-        );
-      },
-      child: Container(
-        color: Color(0xffe8dfce),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              bottom: 0,
-              right: 0,
-              child: Container(
-                width: 5,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.transparent, Colors.black12],
-                  ),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              top: _extraHeight,
-              bottom: _extraHeight,
-              child: SafeArea(
-                child: Container(
-                  width: _maxSlide,
-                  child: Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              width: 25,
-                              height: 25,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.black26,
-                                  width: 4,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: Offset(-15, 0),
-                              child: Text(
-                                "STRING",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  backgroundColor: Color(0xffe8dfce),
-                                  fontWeight: FontWeight.w900,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            _buildMenuItem("Guitars", active: true),
-                            _buildMenuItem("Basses"),
-                            _buildMenuItem("Amps"),
-                            _buildMenuItem("Pedals"),
-                            _buildMenuItem("Others"),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            _buildFooterMenuItem("About"),
-                            _buildFooterMenuItem("Support"),
-                            _buildFooterMenuItem("Terms"),
-                            _buildFooterMenuItem("Faqs"),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            AnimatedBuilder(
-              animation: _animator,
-              builder: (_, __) => Container(
-                width: _maxSlide,
-                color: Colors.black.withAlpha(
-                  (150 * (1 - _animator.value)).floor(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  _build3dObject() => Positioned(
-    top: 0.1 * _screen.height,
-    bottom: 0.22 * _screen.height,
-    left: _maxSlide - _screen.width * 0.5,
-    right: _screen.width * 0.85 - _maxSlide,
-    child: AnimatedBuilder(
-      animation: _objAnimator,
-      builder: (_, __) => ImageSequenceAnimator(
-        "assets/guitarSequence", //folderName
-        "", //fileName
-        1, //suffixStart
-        4, //suffixCount
-        "png", //fileFormat
-        120, //frameCount
-        fps: 60,
-        isLooping: false,
-        isBoomerang: true,
-        isAutoPlay: false,
-      ),
-    ),
-  );
-
-  _buildHeader() => SafeArea(
-    child: AnimatedBuilder(
-        animation: _animator,
-        builder: (_, __) {
-          return Transform.translate(
-            offset: Offset((_screen.width - 60) * _animator.value, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: InkWell(
-                    onTap: _toggleDrawer,
-                    child: Icon(Icons.menu),
-                  ),
-                ),
-                Opacity(
-                  opacity: 1 - _animator.value,
-                  child: Text(
-                    "PRODUCT DETAIL",
-                    style: TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                ),
-                SizedBox(width: 50, height: 50),
               ],
             ),
-          );
-        }),
-  );
-
-  _buildOverlay() => Positioned(
-    top: 0,
-    bottom: 50,
-    left: 0,
-    right: 0,
-    child: AnimatedBuilder(
-      animation: _animator,
-      builder: (_, widget) => Opacity(
-        opacity: 1 - _animator.value,
-        child: Transform.translate(
-          offset: Offset((_maxSlide + 50) * _animator.value, 0),
-          child: Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY((pi / 2 + 0.1) * -_animator.value),
-            alignment: Alignment.centerLeft,
-            child: widget,
           ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Text(
-              "Fender\nAmerican\nElite Strat",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Text(
-                  "SPEC",
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Icon(Icons.keyboard_arrow_down),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
+      );
 }
-
 
 class GLB3DTest extends StatefulWidget {
   const GLB3DTest({Key? key}) : super(key: key);
@@ -566,37 +1050,38 @@ class _GLB3DTestState extends State<GLB3DTest> {
     return Column(
       children: [
         Expanded(
-            child: Cube(
-              onSceneCreated: (Scene scene) {
-                scene.camera.position.setFrom(Vector3(0, 0, 10));
-                scene.light.position.setFrom(Vector3(0, 15, 15));
-                scene.textureBlendMode = BlendMode.modulate;
-                // scene.world.add(Object(scale: Vector3(5.0, 5.0, 5.0), lighting: true, fileName: 'assets/cube/cup_green_obj.obj'));
+          child: Cube(
+            onSceneCreated: (Scene scene) {
+              scene.camera.position.setFrom(Vector3(0, 0, 10));
+              scene.light.position.setFrom(Vector3(0, 15, 15));
+              scene.textureBlendMode = BlendMode.modulate;
+              // scene.world.add(Object(scale: Vector3(5.0, 5.0, 5.0), lighting: true, fileName: 'assets/cube/cup_green_obj.obj'));
 
-                scene.world.add(girl);
+              scene.world.add(girl);
 
-                // scene.world.add(boy);
+              // scene.world.add(boy);
 
-                scene.camera.zoom = 10;
-              },
-              onObjectCreated: (obj) async {
-                final test = await loadMtl('assets/cube/sonyTest.mtl');
-                print(test);
-                print(test['Material.001']);
+              scene.camera.zoom = 10;
+            },
+            onObjectCreated: (obj) async {
+              final test = await loadMtl('assets/cube/sonyTest.mtl');
+              print(test);
+              print(test['Material.001']);
 
-                final texture = await loadTexture(test['Material.001'],'assets/cube/sonyTest.mtl');
-                print(texture);
+              final texture = await loadTexture(
+                  test['Material.001'], 'assets/cube/sonyTest.mtl');
+              print(texture);
 
-                girl.mesh.material = test['Material.001']!;
-                girl.updateTransform();
-                girl.scene!.updateTexture();
-              },
-            ),
+              girl.mesh.material = test['Material.001']!;
+              girl.updateTransform();
+              girl.scene!.updateTexture();
+            },
           ),
+        ),
         TextButton(
           child: Text('변경'),
           onPressed: () async {
-            loadMtl('assets/cube/sonyTest.mtl').then((val){
+            loadMtl('assets/cube/sonyTest.mtl').then((val) {
               print(val);
               print(val['Material.001']);
               girl.mesh.material = val['Material.001']!;
@@ -605,7 +1090,8 @@ class _GLB3DTestState extends State<GLB3DTest> {
               girl.scene!.updateTexture();
             });
 
-            final texture = await loadTexture(girl.mesh.material,'assets/cube/sonyTest.mtl');
+            final texture = await loadTexture(
+                girl.mesh.material, 'assets/cube/sonyTest.mtl');
             print(texture);
 
             loadImageFromAsset('assets/cube/cup_green_obj.png').then((value) {
