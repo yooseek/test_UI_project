@@ -48,6 +48,20 @@ final _router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return shlScreen1(id: state.params['id']!);
           },
+          routes: [
+            GoRoute(
+              path: 'subshl1/:id2',
+              builder: (BuildContext context, GoRouterState state) {
+                return subShlScreen1(id: state.params['id2']!);
+              },
+            ),
+            GoRoute(
+              path: 'subshl2/:id2',
+              builder: (BuildContext context, GoRouterState state) {
+                return subShlScreen2(id: state.params['id2']!);
+              },
+            ),
+          ]
         ),
         GoRoute(
           path: '/shl2/:id',
@@ -137,7 +151,6 @@ class BottomNavScreen extends StatefulWidget {
   @override
   State<BottomNavScreen> createState() => _BottomNavScreenState();
 }
-
 class _BottomNavScreenState extends State<BottomNavScreen> {
 
   static int _calculateSelectedIndex(BuildContext context) {
@@ -209,7 +222,33 @@ class shlScreen1 extends StatelessWidget {
                 height: 120,
               ),
               TextButton(
-                  child: Text('shl1'), onPressed: () => context.go('/1/123'))
+                  child: Text('shl1'), onPressed: () => context.push('/1/123')),
+              TextButton(
+                  child: Text('subShl1'), onPressed: () => context.push('/shl1/123/subShl1/123')),
+              TextButton(
+                  child: Text('subShl2'), onPressed: () => context.go('/shl1/123/subShl2/123'))
+            ],
+          ),
+        ),
+    );
+  }
+}
+class shlScreen2 extends StatelessWidget {
+  const shlScreen2({required this.id, Key? key}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('shl2'), onPressed: () => context.go('/1/123'))
             ],
           ),
         ),
@@ -238,8 +277,8 @@ class shlScreen3 extends StatelessWidget {
     );
   }
 }
-class shlScreen2 extends StatelessWidget {
-  const shlScreen2({required this.id, Key? key}) : super(key: key);
+class subShlScreen1 extends StatelessWidget {
+  const subShlScreen1({required this.id, Key? key}) : super(key: key);
 
   final String id;
 
@@ -253,7 +292,33 @@ class shlScreen2 extends StatelessWidget {
                 height: 120,
               ),
               TextButton(
-                  child: Text('shl2'), onPressed: () => context.go('/1/123'))
+                  child: Text('subShlScreen1'), onPressed: () => context.go('/1/123')),
+              TextButton(
+                  child: Text('pop'), onPressed: () => context.pop())
+            ],
+          ),
+        ),
+    );
+  }
+}
+class subShlScreen2 extends StatelessWidget {
+  const subShlScreen2({required this.id, Key? key}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('subShlScreen2'), onPressed: () => context.go('/1/123')),
+              TextButton(
+                  child: Text('pop'), onPressed: () => context.pop())
             ],
           ),
         ),
