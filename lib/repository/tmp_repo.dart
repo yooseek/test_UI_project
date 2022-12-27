@@ -2,9 +2,7 @@ import 'package:rxdart/rxdart.dart';
 
 abstract class TmpRepository {
   Stream<int> get getCount;
-  Sink<int> get _setCount;
   Stream<List<int>> get getCountList;
-  Sink<List<int>> get _setCountList;
   Future<void> addAllCountList();
   Future<void> minusAllCountList();
 }
@@ -20,14 +18,10 @@ class TmpRepositoryImpl implements TmpRepository{
 
   @override
   Stream<int> get getCount => countObserve.stream;
-
-  @override
   Sink<int> get _setCount => countObserve.sink;
 
   @override
   Stream<List<int>> get getCountList => countListObserve.stream;
-
-  @override
   Sink<List<int>> get _setCountList => countListObserve.sink;
 
   @override

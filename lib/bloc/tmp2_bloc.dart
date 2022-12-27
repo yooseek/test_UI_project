@@ -7,7 +7,15 @@ import 'package:test_ui_project/repository/tmp_repo.dart';
 part 'tmp2_event.dart';
 part 'tmp2_state.dart';
 
-class Tmp2Bloc extends Bloc<Tmp2Event, Tmp2State> {
+mixin BaseState<T> {
+  T get initial;
+}
+
+class BaseBloc<E,S extends BaseState> extends Bloc<E,S> {
+  BaseBloc(S) : super(S);
+}
+
+class Tmp2Bloc extends BaseBloc<Tmp2Event,Tmp2State> {
   final TmpRepository tmpRepository;
 
   Tmp2Bloc({required this.tmpRepository})

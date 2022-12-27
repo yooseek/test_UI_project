@@ -1,6 +1,6 @@
 part of 'tmp2_bloc.dart';
 
-class Tmp2State extends Equatable {
+class Tmp2State extends Equatable with BaseState<Tmp2State> {
   final int count;
   final List<int> countList;
 
@@ -21,4 +21,7 @@ class Tmp2State extends Equatable {
 
   @override
   List<Object> get props => [count, countList];
+
+  @override
+  Tmp2State get initial => const Tmp2State(count: 0,countList: []);
 }

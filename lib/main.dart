@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cube/flutter_cube.dart';
+import 'package:go_router/go_router.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +34,63 @@ import 'package:test_ui_project/screen/bootpay_perchase_screen.dart';
 import 'package:test_ui_project/screen/bootpay_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+final _router = GoRouter(
+  initialLocation: '/1/123',
+  routes: [
+    ShellRoute(
+      // navigatorKey: _shellNavigatorKey,
+      builder: (BuildContext context, GoRouterState state, Widget child) {
+        return BottomNavScreen(child: child);
+      },
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/shl1/:id',
+          builder: (BuildContext context, GoRouterState state) {
+            return shlScreen1(id: state.params['id']!);
+          },
+        ),
+        GoRoute(
+          path: '/shl2/:id',
+          builder: (BuildContext context, GoRouterState state) {
+            return shlScreen2(id: state.params['id']!);
+          },
+        ),
+        GoRoute(
+          path: '/shl3/:id',
+          builder: (BuildContext context, GoRouterState state) {
+            return shlScreen3(id: state.params['id']!);
+          },
+        ),
+      ],
+    ),
+    /// /users/1
+    GoRoute(
+        name: 'tmp1',
+        path: '/1/:id',
+        builder: (context, state) => tmpScreen1(id: state.params['id']!),
+        routes: [
+          GoRoute(
+            name: 'tmp3',
+            path: '3/:id2',
+            builder: (context, state) => tmpScreen3(id: state.params['id2']!),
+          ),
+        ]),
+
+    /// /users?id=1
+    GoRoute(
+      name: 'tmp2',
+      path: '/2',
+      builder: (context, state) => tmpScreen2(id: state.queryParams['id']!),
+    ),
+    GoRoute(
+      name: 'tmp4',
+      path: '/4/:id',
+      builder: (context, state) => tmpScreen4(id: state.params['id']!),
+    ),
+  ],
+  debugLogDiagnostics: true,
+);
+
 void main() async {
   await initializeDependencies();
 
@@ -59,21 +117,154 @@ class _MyAppState extends State<MyApp> {
   });
 ''';
 
-    return MaterialApp(
+    return MaterialApp.router(
       //showSemanticsDebugger: true,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: Scaffold(
-          appBar: AppBar(title: Text("Model Viewer")), body: tmpScreen1()),
+      routerConfig: _router,
+    );
+  }
+}
+
+class BottomNavScreen extends StatefulWidget {
+  const BottomNavScreen({required this.child,Key? key}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<BottomNavScreen> createState() => _BottomNavScreenState();
+}
+
+class _BottomNavScreenState extends State<BottomNavScreen> {
+
+  static int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).location;
+    if (location.startsWith('/shl1')) {
+      return 0;
+    }
+    if (location.startsWith('/shl2')) {
+      return 1;
+    }
+    if (location.startsWith('/shl3')) {
+      return 2;
+    }
+    return 0;
+  }
+
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        GoRouter.of(context).go('/shl1/123');
+        break;
+      case 1:
+        GoRouter.of(context).go('/shl2/123');
+        break;
+      case 2:
+        GoRouter.of(context).go('/shl3/123');
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'shl1 Screen',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business),
+            label: 'shl2 Screen',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notification_important_rounded),
+            label: 'shl3 Screen',
+          ),
+        ],
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (int idx) => _onItemTapped(idx, context),
+      ),
+    );
+  }
+}
+
+class shlScreen1 extends StatelessWidget {
+  const shlScreen1({required this.id, Key? key}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('shl1'), onPressed: () => context.go('/1/123'))
+            ],
+          ),
+        ),
+    );
+  }
+}
+class shlScreen3 extends StatelessWidget {
+  const shlScreen3({required this.id, Key? key}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('shl3'), onPressed: () => context.go('/1/123'))
+            ],
+          ),
+        ),
+    );
+  }
+}
+class shlScreen2 extends StatelessWidget {
+  const shlScreen2({required this.id, Key? key}) : super(key: key);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+              ),
+              TextButton(
+                  child: Text('shl2'), onPressed: () => context.go('/1/123'))
+            ],
+          ),
+        ),
     );
   }
 }
 
 class tmpScreen1 extends StatelessWidget {
-  const tmpScreen1({Key? key}) : super(key: key);
+  const tmpScreen1({required this.id, Key? key}) : super(key: key);
+
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -108,9 +299,10 @@ class tmpScreen1 extends StatelessWidget {
                             serviceLocator<TmpBloc>().add(MinusCount())),
                     TextButton(
                         child: Text('tmp2'),
-                        onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => tmpScreen2()),
-                            ))
+                        onPressed: () => context.go('/2?id=123')),
+                    TextButton(
+                        child: Text('shl1'),
+                        onPressed: () => context.go('/shl1/123'))
                   ],
                 );
               },
@@ -123,7 +315,8 @@ class tmpScreen1 extends StatelessWidget {
 }
 
 class tmpScreen2 extends StatelessWidget {
-  const tmpScreen2({Key? key}) : super(key: key);
+  const tmpScreen2({required this.id, Key? key}) : super(key: key);
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -136,20 +329,12 @@ class tmpScreen2 extends StatelessWidget {
                 height: 120,
               ),
               TextButton(
-                  child: Text('tmp1'),
-                  onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => tmpScreen1()),
-                      )),
+                  child: Text('tmp1'), onPressed: () => context.go('/1/123')),
               TextButton(
                   child: Text('tmp3'),
-                  onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => tmpScreen3()),
-                      )),
+                  onPressed: () => context.go('/1/123/3/123')),
               TextButton(
-                  child: Text('tmp4'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => tmpScreen4()),
-                  ))
+                  child: Text('tmp4'), onPressed: () => context.go('/4/123'))
             ],
           ),
         ),
@@ -159,7 +344,8 @@ class tmpScreen2 extends StatelessWidget {
 }
 
 class tmpScreen3 extends StatelessWidget {
-  const tmpScreen3({Key? key}) : super(key: key);
+  const tmpScreen3({required this.id, Key? key}) : super(key: key);
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -194,9 +380,9 @@ class tmpScreen3 extends StatelessWidget {
                             serviceLocator<TmpBloc>().add(MinusCount())),
                     TextButton(
                         child: Text('tmp2'),
-                        onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => tmpScreen2()),
-                            ))
+                        onPressed: () => context.push('/2?id=123')),
+                    TextButton(
+                        child: Text('pop'), onPressed: () => context.pop())
                   ],
                 );
               },
@@ -209,7 +395,8 @@ class tmpScreen3 extends StatelessWidget {
 }
 
 class tmpScreen4 extends StatelessWidget {
-  const tmpScreen4({Key? key}) : super(key: key);
+  const tmpScreen4({required this.id, Key? key}) : super(key: key);
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -244,9 +431,7 @@ class tmpScreen4 extends StatelessWidget {
                             serviceLocator<Tmp2Bloc>().add(MinusCount2())),
                     TextButton(
                         child: Text('tmp2'),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => tmpScreen2()),
-                        ))
+                        onPressed: () => context.go('/2?id=123'))
                   ],
                 );
               },
