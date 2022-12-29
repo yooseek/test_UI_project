@@ -12,6 +12,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' hide Path;
 import 'dart:ui' as ui;
+import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -123,22 +124,299 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    String js = '''
-  const modelViewer = document.querySelector('#widget');
-  modelViewer.addEventListener('click', event => {
-    var ani = modelViewer.animationName === 'idle' ? 'anotherAni' : 'idle';
-    modelViewer.setAttribute('animation-name', ani);
-  });
-''';
-
-    return MaterialApp.router(
+    return MaterialApp(
       //showSemanticsDebugger: true,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      routerConfig: _router,
+      // routerConfig: _router,
+      home: LikeIcon(),
+    );
+  }
+}
+
+class LikeIcon extends StatefulWidget {
+  const LikeIcon({Key? key}) : super(key: key);
+
+  @override
+  State<LikeIcon> createState() => _LikeIconState();
+}
+
+class _LikeIconState extends State<LikeIcon> {
+
+  List<Icon> icons = [];
+  List<Widget> realIcons = [];
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      body: Center(
+        child: Container(
+                width: 100,
+                height: 250,
+                color: Colors.redAccent,
+                child: Stack(
+                  children: [
+                    ...realIcons,
+                    GestureDetector(
+                      onTap: (){
+                        setState(() {
+                          realIcons.add(Positioned(
+                            right: 10,
+                            bottom: 10,
+                            child: IconAnimation(key: Key(DateTime.now().microsecondsSinceEpoch.toString()),onAnimationFinished: (){
+                              setState(() {
+                                realIcons.removeWhere(
+                                        (e) {
+                                      return e.key == Key(DateTime.now().microsecondsSinceEpoch.toString());
+                                    }
+                                );
+                              });
+                            }),
+                          ));
+                        });
+                      },
+                      onLongPress: (){},
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: const Text('버튼 !!! '),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class IconAnimation extends StatefulWidget {
+  const IconAnimation({required this.onAnimationFinished,super.key});
+
+  final VoidCallback onAnimationFinished;
+
+  @override
+  State<IconAnimation> createState() => _IIconAnimationState();
+}
+
+class _IIconAnimationState extends State<IconAnimation> with SingleTickerProviderStateMixin{
+
+  late AnimationController controller;
+
+  late Animation<double> animation;
+  late Animation<double> opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    animation = Tween<double>(begin: 0.0, end:0.85).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    opacityAnimation = Tween<double>(begin: 1.0, end:0.0).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+    controller.forward();
+    controller.addListener(() {
+      if (controller.status == AnimationStatus.completed) {
+        widget.onAnimationFinished();
+        controller.dispose();
+      }
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    final animationHeight = Random().nextInt(100);
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, animation.value * -animationHeight),
+          child: Opacity(
+            opacity: animation.value,
+              child: child
+          ),
+        );
+      },
+      child: Icon(Icons.ac_unit),
+    );
+  }
+}
+
+
+
+class Layer3DAnimation extends StatefulWidget {
+  const Layer3DAnimation({Key? key}) : super(key: key);
+
+  @override
+  State<Layer3DAnimation> createState() => _Layer3DAnimationState();
+}
+class _Layer3DAnimationState extends State<Layer3DAnimation> with SingleTickerProviderStateMixin{
+  late AnimationController controller;
+
+  late Animation<double> backgroundAnimation;
+  late Animation<double> layerAnimation;
+  late Animation<Offset> offsetAnimation;
+  late Animation<Offset> offset2Animation;
+  late Animation<Offset> offset3Animation;
+  late Animation<Offset> offset4Animation;
+  late Animation<Offset> offset5Animation;
+
+  bool isCheck = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    backgroundAnimation = Tween<double>(begin: 0.0, end:0.85).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    layerAnimation = Tween<double>(begin: 0.0, end:0.85).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+    /// 레이어별 간격 조정 하려면 offset 값들을 조정하면 된다
+    offsetAnimation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset(-50.0, - 200.0)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    offset2Animation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset(0.0, - 160.0)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    offset3Animation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset(50.0, - 120.0)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    offset4Animation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset(100.0, - 80.0)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    offset5Animation = Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset(150.0, - 40.0)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+  }
+
+  
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: backgroundAnimation,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Colors.white.withOpacity(1 - backgroundAnimation.value),
+            body: child,
+        );
+      },
+      child: Center(
+          child: InkWell(
+            onTap: (){
+              if(!isCheck){
+                controller.forward();
+              }else{
+                controller.reverse();
+              }
+              setState(() {
+                isCheck = !isCheck;
+              });
+            },
+            child: AnimatedBuilder(
+              animation: layerAnimation,
+              builder: (context, child) {
+                return Transform(
+                    transform: Matrix4.identity()
+                  ..rotateX(layerAnimation.value)
+                  ..rotateZ(layerAnimation.value),
+                child: child);
+              },
+              child: Stack(
+                  children: [
+                    AnimatedBuilder(
+                      animation: offset5Animation,
+                      builder: (context,widget) {
+                        return Transform.translate(
+                            offset: offset5Animation.value,
+                            child: widget
+                        );
+                      },
+                      child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration : BoxDecoration(
+                            color: Colors.transparent,
+                            boxShadow: [BoxShadow(
+                              color: Colors.grey.withOpacity(0.4),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            )]
+                          ),
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: offset4Animation,
+                      builder: (context,widget) {
+                        return Transform.translate(
+                            offset: offset4Animation.value,
+                            child: widget
+                        );
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        color: Colors.grey[200],
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: offset3Animation,
+                      builder: (context,widget) {
+                        return Transform.translate(
+                              offset: offset3Animation.value,
+                              child: widget
+                        );
+                      },
+                      child: Container(
+                          width: 200,
+                          height: 200,
+                          color: Colors.orange,
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: offset2Animation,
+                      builder: (context,widget){
+                        return Transform.translate(
+                            offset: offset2Animation.value,
+                              child: widget
+                        );
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.pink,
+                              width: 2,
+                            ),
+                            color: Colors.transparent
+                        ),
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: offsetAnimation,
+                      builder: (context,widget) {
+                        return Transform.translate(
+                            offset: offsetAnimation.value,
+                            child: widget
+                        );
+                      },
+                      child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey.shade200,
+                                width: 2,
+                              ),
+                              color: Colors.transparent
+                          ),
+                          child: Center(child: Text('컬러 필터'))
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
     );
   }
 }
@@ -378,7 +656,6 @@ class tmpScreen1 extends StatelessWidget {
     );
   }
 }
-
 class tmpScreen2 extends StatelessWidget {
   const tmpScreen2({required this.id, Key? key}) : super(key: key);
   final String id;
@@ -407,7 +684,6 @@ class tmpScreen2 extends StatelessWidget {
     );
   }
 }
-
 class tmpScreen3 extends StatelessWidget {
   const tmpScreen3({required this.id, Key? key}) : super(key: key);
   final String id;
@@ -458,7 +734,6 @@ class tmpScreen3 extends StatelessWidget {
     );
   }
 }
-
 class tmpScreen4 extends StatelessWidget {
   const tmpScreen4({required this.id, Key? key}) : super(key: key);
   final String id;
@@ -514,7 +789,6 @@ class CustomPage3DContainer extends StatefulWidget {
   @override
   State<CustomPage3DContainer> createState() => _CustomPage3DContainerState();
 }
-
 class _CustomPage3DContainerState extends State<CustomPage3DContainer>
     with SingleTickerProviderStateMixin {
   var _maxSlide = 0.75;
@@ -805,7 +1079,6 @@ class Page3DContainer extends StatefulWidget {
   @override
   State<Page3DContainer> createState() => _Page3DContainerState();
 }
-
 class _Page3DContainerState extends State<Page3DContainer>
     with SingleTickerProviderStateMixin {
   var _maxSlide = 0.75;
@@ -1274,7 +1547,6 @@ class GLB3DTest extends StatefulWidget {
   @override
   State<GLB3DTest> createState() => _GLB3DTestState();
 }
-
 class _GLB3DTestState extends State<GLB3DTest> {
   bool check = false;
   late Object girl;

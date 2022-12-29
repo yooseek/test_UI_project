@@ -29,7 +29,6 @@ class GraphScreen extends StatelessWidget {
   }
 }
 
-
 class ChartPainter extends CustomPainter {
   final List<int> test = List.generate(50, (index) => Random().nextInt(20));
 
