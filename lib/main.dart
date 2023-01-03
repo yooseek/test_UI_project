@@ -138,8 +138,85 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       // routerConfig: _router,
-      home: OKCustomPainter(),
+      home: ReverseCustomList(),
     );
+  }
+}
+
+class TestCustomList extends StatelessWidget {
+  const TestCustomList({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+
+class ReverseCustomList extends StatefulWidget {
+  const ReverseCustomList({Key? key}) : super(key: key);
+
+  @override
+  State<ReverseCustomList> createState() => _ReverseCustomListState();
+}
+
+class _ReverseCustomListState extends State<ReverseCustomList> {
+
+  List<String> testList = List.generate(30, (index)=> index.toString());
+  late Map<String,int> testListIndex = {};
+  int count = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    updateListIndex(0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+          children: [
+            Expanded(
+              child: ListView.custom(
+                reverse: true,
+                childrenDelegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final element = testList[testList.length - 1 - index];
+
+                    return Container(
+                      key: ValueKey(element), // ex) element.id
+                      height: 80,
+                      alignment: Alignment.center,
+                      child: Text(element), // ex) element.content
+                    );
+                  },
+                  childCount: testList.length,
+                  findChildIndexCallback: (key) {
+                    final valueKey = key as ValueKey<String>;
+                    final val = testListIndex[valueKey.value]!;
+
+                    return testList.length - 1 - val;
+                  }
+                ),
+              ),
+            ),
+            TextButton(child: Text('리스트 추가하기'),onPressed: (){
+              setState(() {
+                testList.add(count.toString());
+                updateListIndex(testList.length - 1);
+                count ++;
+              });
+            },),
+          ],
+        ),
+    );
+  }
+
+  void updateListIndex(int start) {
+    for(int i = start; i < testList.length; i ++){
+      testListIndex[testList[i]] = i;
+    }
   }
 }
 
