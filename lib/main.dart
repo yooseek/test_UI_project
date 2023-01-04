@@ -27,8 +27,10 @@ import 'package:share/share.dart';
 import 'package:test_ui_project/api/retrofit_service.dart';
 import 'package:test_ui_project/bloc/tmp2_bloc.dart';
 import 'package:test_ui_project/bloc/tmp_bloc.dart';
+import 'package:test_ui_project/component/image_shadow.dart';
 import 'package:test_ui_project/injection_container.dart';
 import 'package:test_ui_project/models/band.dart';
+import 'package:test_ui_project/models/person.dart';
 import 'package:test_ui_project/provider/socket_provider.dart';
 import 'package:test_ui_project/repository/tmp_repo.dart';
 import 'package:test_ui_project/screen/bootpay_perchase_screen.dart';
@@ -36,7 +38,7 @@ import 'package:test_ui_project/screen/bootpay_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 final _router = GoRouter(
-  initialLocation: '/1/123',
+  initialLocation: '/unAuth',
   routes: [
     ShellRoute(
       // navigatorKey: _shellNavigatorKey,
@@ -79,28 +81,56 @@ final _router = GoRouter(
     ),
 
     /// /users/1
-    GoRoute(
-        name: 'tmp1',
-        path: '/1/:id',
-        builder: (context, state) => tmpScreen1(id: state.params['id']!),
-        routes: [
-          GoRoute(
-            name: 'tmp3',
-            path: '3/:id2',
-            builder: (context, state) => tmpScreen3(id: state.params['id2']!),
-          ),
-        ]),
 
     /// /users?id=1
     GoRoute(
       name: 'tmp2',
       path: '/2',
       builder: (context, state) => tmpScreen2(id: state.queryParams['id']!),
+      pageBuilder: (context, state) {
+        return MaterialPage(
+          key: state.pageKey,
+          child: tmpScreen2(id: state.queryParams['id']!),
+        );
+      }
     ),
     GoRoute(
       name: 'tmp4',
       path: '/4/:id',
       builder: (context, state) => tmpScreen4(id: state.params['id']!),
+    ),
+    GoRoute(
+      name: 'auth',
+      path: '/auth',
+      builder: (context, state) => tmpScreen1(id: '1',auth: true),
+        routes: [
+          GoRoute(
+              name: 'tmp1',
+              path: '1/:id',
+              builder: (context, state) => tmpScreen1(id: state.params['id']!,auth: true),
+              routes: [
+                GoRoute(
+                  name: 'tmp1_sub1',
+                  path: ':id2',
+                  builder: (context, state) => tmpScreen1(id: state.params['id']!,id2: state.params['id2'],auth: true),
+                ),
+                GoRoute(
+                  name: 'tmp1_sub2',
+                  path: ':id2',
+                  builder: (context, state) => tmpScreen1(id: state.params['id2']!,id2: state.params['id2'],auth: true),
+                ),
+                GoRoute(
+                  name: 'tmp3',
+                  path: '3/:id2',
+                  builder: (context, state) => tmpScreen3(id: state.params['id2']!),
+                ),
+              ]),
+        ]
+    ),
+    GoRoute(
+      name: 'unAuth',
+      path: '/unAuth',
+      builder: (context, state) => tmpScreen1(id: '-1',auth: false),
     ),
   ],
   debugLogDiagnostics: true,
@@ -138,20 +168,10 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       // routerConfig: _router,
-      home: ReverseCustomList(),
+      home: OKCustomPainter()
     );
   }
 }
-
-class TestCustomList extends StatelessWidget {
-  const TestCustomList({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 
 class ReverseCustomList extends StatefulWidget {
   const ReverseCustomList({Key? key}) : super(key: key);
@@ -159,7 +179,6 @@ class ReverseCustomList extends StatefulWidget {
   @override
   State<ReverseCustomList> createState() => _ReverseCustomListState();
 }
-
 class _ReverseCustomListState extends State<ReverseCustomList> {
 
   List<String> testList = List.generate(30, (index)=> index.toString());
@@ -226,15 +245,13 @@ class OKCustomPainter extends StatefulWidget {
   @override
   State<OKCustomPainter> createState() => _OKCustomPainterState();
 }
-
 class _OKCustomPainterState extends State<OKCustomPainter> with SingleTickerProviderStateMixin{
   late final AnimationController controller;
-
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this,duration: Duration(seconds: 1));
+    controller = AnimationController(vsync: this,duration: Duration(milliseconds: 800));
 
     controller.forward();
   }
@@ -250,13 +267,10 @@ class _OKCustomPainterState extends State<OKCustomPainter> with SingleTickerProv
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Container(
-          width: 300,
-          height: 300,
-          child: CustomPaint(
+        child: CustomPaint(
+            size: const Size(300,300),
             painter: AnimatedPathPainter(controller),
           ),
-        ),
       ),
     );
   }
@@ -272,7 +286,7 @@ class AnimatedPathPainter extends CustomPainter {
       ) {
     var currentLength = 0.0;
 
-    final path = new Path();
+    final path = Path();
 
     var metricsIterator = originalPath.computeMetrics().iterator;
 
@@ -318,11 +332,33 @@ class AnimatedPathPainter extends CustomPainter {
     double w = size.width;
     double h = size.height;
 
+    Offset startPoint = Offset(w * 0.23, h * 0.5);
+    Offset centerPoint = Offset(w * 0.43, h * 0.7);
+    Offset endPoint = Offset(w * 0.75, h * 0.35);
+
     /// 이곳에 커스텀 ClipPath 작성
     return Path()
       ..moveTo(w * 0.5, 0)
-      ..relativeArcToPoint(Offset(0, h*0.5),radius: Radius.circular(50),clockwise: false)
-      ..relativeArcToPoint(Offset(0,-h*0.5),radius: Radius.circular(50),clockwise: false);
+      ..relativeArcToPoint(Offset(0, h),radius: Radius.circular(10),clockwise: false)
+      ..relativeArcToPoint(Offset(0,-h),radius: Radius.circular(10),clockwise: false)
+      ..moveTo(startPoint.dx,startPoint.dy)
+      ..lineTo(centerPoint.dx,centerPoint.dy)
+      ..lineTo(endPoint.dx,endPoint.dy);
+  }
+
+  Path _createCheckPath(Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    Offset startPoint = Offset(w * 0.23, h * 0.5);
+    Offset centerPoint = Offset(w * 0.43, h * 0.7);
+    Offset endPoint = Offset(w * 0.75, h * 0.35);
+
+    /// 이곳에 커스텀 ClipPath 작성
+    return Path()
+      ..moveTo(startPoint.dx,startPoint.dy)
+      ..lineTo(centerPoint.dx,centerPoint.dy)
+      ..lineTo(endPoint.dx,endPoint.dy);
   }
 
   @override
@@ -334,9 +370,24 @@ class AnimatedPathPainter extends CustomPainter {
     final Paint paint = Paint();
     paint.color = Colors.amberAccent;
     paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 1.0;
+    paint.strokeWidth = 5.0;
 
-    canvas.drawPath(path, paint);
+    /// path에 따라 쭈욱 그리는 애니메이션
+    // canvas.drawPath(path, paint);
+
+    /// 원이 커지는 애니메이션
+    canvas.drawCircle(
+      Offset(
+        size.width / 2,
+        size.height / 2,
+      ),
+      1 + min(animationPercent * size.width, size.width / 2),
+      paint,
+    );
+
+    final checkPath = createAnimatedPath(_createCheckPath(size), animationPercent * 2);
+    /// check표시 애니메이션
+    canvas.drawPath(checkPath, paint);
   }
 
   @override
@@ -1102,55 +1153,219 @@ class subShlScreen2 extends StatelessWidget {
 }
 
 class tmpScreen1 extends StatelessWidget {
-  const tmpScreen1({required this.id, Key? key}) : super(key: key);
+  const tmpScreen1({required this.id,this.id2,this.auth = false,Key? key}) : super(key: key);
 
   final String id;
+  final String? id2;
+  final bool auth;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TmpBloc>(
-      create: (context) => serviceLocator()
-        ..add(InitTmpEvent1())
-        ..add(InitTmpEvent2()),
-      child: Scaffold(
-        body: Container(
-          child: Center(
-            child: BlocBuilder<TmpBloc, TmpState>(
-              builder: (context, state) {
-                final count = state.count;
-                final countList = state.countList;
-                return Column(
-                  children: [
-                    SizedBox(
-                      height: 120,
-                    ),
-                    Text(count.toString()),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ...countList.map((e) => Text(e.toString())).toList(),
-                    TextButton(
-                        child: Text('++'),
-                        onPressed: () =>
-                            serviceLocator<TmpBloc>().add(AddCount())),
-                    TextButton(
-                        child: Text('--'),
-                        onPressed: () =>
-                            serviceLocator<TmpBloc>().add(MinusCount())),
-                    TextButton(
-                        child: Text('tmp2'),
-                        onPressed: () => context.go('/2?id=123')),
-                    TextButton(
-                        child: Text('shl1'),
-                        onPressed: () => context.go('/shl1/123'))
-                  ],
-                );
-              },
+
+    if(id2 == '123'){
+      return BlocProvider<TmpBloc>(
+        create: (context) => serviceLocator()
+          ..add(InitTmpEvent1())
+          ..add(InitTmpEvent2()),
+        child: Scaffold(
+          body: Container(
+            child: Center(
+              child: BlocBuilder<TmpBloc, TmpState>(
+                builder: (context, state) {
+                  final count = state.count;
+                  final countList = state.countList;
+
+                  if(auth) {
+                    return Column(
+                      children: [
+                        SizedBox(
+                          height: 120,
+                        ),
+                        Text(count.toString()),
+                        Text('---------- auth ---------'),
+                        Text('sub 2 page!!!!!!!!!!!!!!!!!!!!!!!'),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        ...countList.map((e) => Text(e.toString())).toList(),
+                        TextButton(
+                            child: Text('++'),
+                            onPressed: () =>
+                                serviceLocator<TmpBloc>().add(AddCount())),
+                        TextButton(
+                            child: Text('--'),
+                            onPressed: () =>
+                                serviceLocator<TmpBloc>().add(MinusCount())),
+                        TextButton(
+                            child: Text('tmp1sub1'),
+                            onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                        TextButton(
+                            child: Text('tmp1sub2'),
+                            onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                        TextButton(
+                            child: Text('tmp2'),
+                            onPressed: () => context.go('/2?id=123')),
+                        TextButton(
+                            child: Text('shl1'),
+                            onPressed: () => context.go('/shl1/123')),
+                        TextButton(
+                            child: Text('auth'),
+                            onPressed: () => context.goNamed('auth')),
+                        TextButton(
+                            child: Text('un auth'),
+                            onPressed: () => context.goNamed('unAuth')),
+                      ],
+                    );
+                  }
+
+
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 120,
+                      ),
+                      Text(count.toString()),
+                      Text('---------- unauth ---------'),
+                      Text('sub 2 page!!!!!!!!!!!!!!!!!!!!!!!'),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ...countList.map((e) => Text(e.toString())).toList(),
+                      TextButton(
+                          child: Text('++'),
+                          onPressed: () =>
+                              serviceLocator<TmpBloc>().add(AddCount())),
+                      TextButton(
+                          child: Text('--'),
+                          onPressed: () =>
+                              serviceLocator<TmpBloc>().add(MinusCount())),
+                      TextButton(
+                          child: Text('tmp1sub1'),
+                          onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                      TextButton(
+                          child: Text('tmp1sub2'),
+                          onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                      TextButton(
+                          child: Text('tmp2'),
+                          onPressed: () => context.go('/2?id=123')),
+                      TextButton(
+                          child: Text('shl1'),
+                          onPressed: () => context.go('/shl1/123')),
+                      TextButton(
+                          child: Text('auth'),
+                          onPressed: () => context.goNamed('auth')),
+                      TextButton(
+                          child: Text('un auth'),
+                          onPressed: () => context.goNamed('unAuth')),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }else {
+      return BlocProvider<TmpBloc>(
+        create: (context) => serviceLocator()
+          ..add(InitTmpEvent1())
+          ..add(InitTmpEvent2()),
+        child: Scaffold(
+          body: Container(
+            child: Center(
+              child: BlocBuilder<TmpBloc, TmpState>(
+                builder: (context, state) {
+                  final count = state.count;
+                  final countList = state.countList;
+
+                  if(auth) {
+                    return Column(
+                      children: [
+                        SizedBox(
+                          height: 120,
+                        ),
+                        Text(count.toString()),
+                        Text('---------- auth ---------'),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        ...countList.map((e) => Text(e.toString())).toList(),
+                        TextButton(
+                            child: Text('++'),
+                            onPressed: () =>
+                                serviceLocator<TmpBloc>().add(AddCount())),
+                        TextButton(
+                            child: Text('--'),
+                            onPressed: () =>
+                                serviceLocator<TmpBloc>().add(MinusCount())),
+                        TextButton(
+                            child: Text('tmp1sub1'),
+                            onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                        TextButton(
+                            child: Text('tmp1sub2'),
+                            onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                        TextButton(
+                            child: Text('tmp2'),
+                            onPressed: () => context.go('/2?id=123')),
+                        TextButton(
+                            child: Text('shl1'),
+                            onPressed: () => context.go('/shl1/123')),
+                        TextButton(
+                            child: Text('auth'),
+                            onPressed: () => context.goNamed('auth')),
+                        TextButton(
+                            child: Text('un auth'),
+                            onPressed: () => context.goNamed('unAuth')),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 120,
+                      ),
+                      Text('---------- unauth ---------'),
+                      Text(count.toString()),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ...countList.map((e) => Text(e.toString())).toList(),
+                      TextButton(
+                          child: Text('++'),
+                          onPressed: () =>
+                              serviceLocator<TmpBloc>().add(AddCount())),
+                      TextButton(
+                          child: Text('--'),
+                          onPressed: () =>
+                              serviceLocator<TmpBloc>().add(MinusCount())),
+                      TextButton(
+                          child: Text('tmp1sub1'),
+                          onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                      TextButton(
+                          child: Text('tmp1sub2'),
+                          onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                      TextButton(
+                          child: Text('tmp2'),
+                          onPressed: () => context.go('/2?id=123')),
+                      TextButton(
+                          child: Text('shl1'),
+                          onPressed: () => context.go('/shl1/123')),
+                      TextButton(
+                          child: Text('auth'),
+                          onPressed: () => context.goNamed('auth')),
+                      TextButton(
+                          child: Text('un auth'),
+                          onPressed: () => context.goNamed('unAuth')),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
 
@@ -1169,10 +1384,10 @@ class tmpScreen2 extends StatelessWidget {
                 height: 120,
               ),
               TextButton(
-                  child: Text('tmp1'), onPressed: () => context.go('/1/123')),
+                  child: Text('tmp1'), onPressed: () => context.goNamed('tmp1',params: {'id' : '123'})),
               TextButton(
                   child: Text('tmp3'),
-                  onPressed: () => context.go('/1/123/3/123')),
+                  onPressed: () => context.go('/auth/1/123/3/123')),
               TextButton(
                   child: Text('tmp4'), onPressed: () => context.go('/4/123'))
             ],
