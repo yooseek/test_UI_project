@@ -42,6 +42,7 @@ dependencies:
   provider: ^6.0.4
   get_it:
   go_router: ^6.0.0
+  screen_utils:
 
   dio: ^4.0.6
   dio_cache_interceptor: ^3.2.7
@@ -72,6 +73,7 @@ dependencies:
 #      ref: master
 
   image_sequence_animator: ^2.0.0
+  rive: ^0.9.0
 
 dev_dependencies:
   flutter_test:

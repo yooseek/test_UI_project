@@ -21,6 +21,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_sequence_animator/image_sequence_animator.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rive/rive.dart' hide LinearGradient;
 import 'package:rxdart/rxdart.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share/share.dart';
@@ -84,53 +85,59 @@ final _router = GoRouter(
 
     /// /users?id=1
     GoRoute(
-      name: 'tmp2',
-      path: '/2',
-      builder: (context, state) => tmpScreen2(id: state.queryParams['id']!),
-      pageBuilder: (context, state) {
-        return MaterialPage(
-          key: state.pageKey,
-          child: tmpScreen2(id: state.queryParams['id']!),
-        );
-      }
-    ),
+        name: 'tmp2',
+        path: '/2',
+        builder: (context, state) => tmpScreen2(id: state.queryParams['id']!),
+        pageBuilder: (context, state) {
+          return MaterialPage(
+            key: state.pageKey,
+            child: tmpScreen2(id: state.queryParams['id']!),
+          );
+        }),
     GoRoute(
       name: 'tmp4',
       path: '/4/:id',
       builder: (context, state) => tmpScreen4(id: state.params['id']!),
     ),
     GoRoute(
-      name: 'auth',
-      path: '/auth',
-      builder: (context, state) => tmpScreen1(id: '1',auth: true),
+        name: 'auth',
+        path: '/auth',
+        builder: (context, state) => tmpScreen1(id: '1', auth: true),
         routes: [
           GoRoute(
               name: 'tmp1',
               path: '1/:id',
-              builder: (context, state) => tmpScreen1(id: state.params['id']!,auth: true),
+              builder: (context, state) =>
+                  tmpScreen1(id: state.params['id']!, auth: true),
               routes: [
                 GoRoute(
                   name: 'tmp1_sub1',
                   path: ':id2',
-                  builder: (context, state) => tmpScreen1(id: state.params['id']!,id2: state.params['id2'],auth: true),
+                  builder: (context, state) => tmpScreen1(
+                      id: state.params['id']!,
+                      id2: state.params['id2'],
+                      auth: true),
                 ),
                 GoRoute(
                   name: 'tmp1_sub2',
                   path: ':id2',
-                  builder: (context, state) => tmpScreen1(id: state.params['id2']!,id2: state.params['id2'],auth: true),
+                  builder: (context, state) => tmpScreen1(
+                      id: state.params['id2']!,
+                      id2: state.params['id2'],
+                      auth: true),
                 ),
                 GoRoute(
                   name: 'tmp3',
                   path: '3/:id2',
-                  builder: (context, state) => tmpScreen3(id: state.params['id2']!),
+                  builder: (context, state) =>
+                      tmpScreen3(id: state.params['id2']!),
                 ),
               ]),
-        ]
-    ),
+        ]),
     GoRoute(
       name: 'unAuth',
       path: '/unAuth',
-      builder: (context, state) => tmpScreen1(id: '-1',auth: false),
+      builder: (context, state) => tmpScreen1(id: '-1', auth: false),
     ),
   ],
   debugLogDiagnostics: true,
@@ -141,12 +148,15 @@ void main() async {
 
   runApp(const MyApp());
 }
+
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }
 }
+
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -160,15 +170,532 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //showSemanticsDebugger: true,
-      scrollBehavior: MyCustomScrollBehavior(),
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+        //showSemanticsDebugger: true,
+        scrollBehavior: MyCustomScrollBehavior(),
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        // routerConfig: _router,
+        home: CustomBackDropContainer(
+          constrainSize: Size(100, 200),
+        ));
+  }
+}
+
+class SimpleRive extends StatefulWidget {
+  const SimpleRive({Key? key}) : super(key: key);
+
+  @override
+  State<SimpleRive> createState() => _SimpleRiveState();
+}
+class _SimpleRiveState extends State<SimpleRive> {
+  late RiveAnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SimpleAnimation('Change', autoplay: true);
+  }
+
+  void _togglePlay() =>
+      setState(() => _controller.isActive = !_controller.isActive);
+
+  bool get isPlaying => _controller.isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: GestureDetector(
+          child: RiveAnimation.asset(
+            'assets/images/new_Alert.riv',
+            controllers: [_controller],
+            // stateMachines: const ['Pressed'],
+            // Update the play state when the widget's initialized
+          ),
+        ),
       ),
-      // routerConfig: _router,
-      home: OKCustomPainter()
+      floatingActionButton: FloatingActionButton(
+        onPressed: _togglePlay,
+        tooltip: isPlaying ? 'Pause' : 'Play',
+        child: Icon(
+          isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
+      ),
+    );
+  }
+}
+
+class CustomBackDropContainer extends StatefulWidget {
+  const CustomBackDropContainer({required this.constrainSize, Key? key})
+      : super(key: key);
+
+  final Size constrainSize;
+
+  @override
+  State<CustomBackDropContainer> createState() =>
+      _CustomBackDropContainerState();
+}
+
+class _CustomBackDropContainerState extends State<CustomBackDropContainer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  // 애니메이션 속도 비율
+  final double _kFlingVelocity = 2.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 12300),
+      value: 1.0,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool get _animationStatus {
+    final AnimationStatus status = _controller.status;
+    return status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
+  }
+
+  void _toggleBackdropLayerVisibility() {
+    // 간편한 모드 - 기본 스프링 애니메이션을 사용해라
+    _controller.fling(velocity: _animationStatus ? -_kFlingVelocity : _kFlingVelocity);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Size layerSize = widget.constrainSize;
+    final size = MediaQuery.of(context).size;
+
+    Animation<RelativeRect> layerAnimation = RelativeRectTween(
+      begin: RelativeRect.fromLTRB(
+          size.width - layerSize.width,size.height - layerSize.height, 0, 0),
+      end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+    ).animate(_controller.view);
+
+    Animation<Rect?> relAnimation = RectTween(
+      begin: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+      end: Rect.fromLTRB(0.0, 0.0, 0.0, 100.0),
+    ).animate(_controller.view);
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          // widget.backLayer,
+          Positioned.fill(
+            child: Container(color: Colors.red),
+          ),
+          RelativePositionedTransition(
+            rect: relAnimation,
+            size: Size(0,100),
+            child: Container(
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(46.0),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _toggleBackdropLayerVisibility,
+                    child: Container(
+                      height: 140.0,
+                      alignment: AlignmentDirectional.centerStart,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(color: Colors.white,child: Center(child: Text('Front')),),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomRiveAnimation extends StatefulWidget {
+  const CustomRiveAnimation({Key? key}) : super(key: key);
+
+  @override
+  State<CustomRiveAnimation> createState() => _CustomRiveAnimationState();
+}
+
+class _CustomRiveAnimationState extends State<CustomRiveAnimation> {
+  // Controller for playback
+  late RiveAnimationController _controller;
+  late StateMachineController _stateController;
+  SMIBool? _pressed;
+  SMITrigger? _triggerPressed;
+
+  void _togglePlay() =>
+      setState(() => _controller.isActive = !_controller.isActive);
+
+  bool get isPlaying => _controller.isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SimpleAnimation('go');
+  }
+
+  void _hitPressed() {
+    print(_pressed?.value);
+    if (_pressed?.value == false) {
+      _pressed?.value = true;
+      _triggerPressed?.fire();
+    } else {
+      _pressed?.value = false;
+      _pressed?.change(false);
+    }
+  }
+
+  void _onInit(Artboard art) {
+    _stateController = StateMachineController.fromArtboard(
+            art, 'State Machine 1', onStateChange: _onStateChange)
+        as StateMachineController;
+
+    print('_stateController ===========================  $_stateController');
+    _pressed = _stateController.findInput<bool>('Pressed') as SMIBool?;
+    _triggerPressed = _stateController.findSMI('Pressed') as SMITrigger?;
+    print('_pressed ===========================  ${_pressed?.name}');
+
+    art.addController(_stateController);
+  }
+
+  void _onStateChange(String stateMachineName, String stateName) =>
+      print('stateMachineName : $stateMachineName --- stateName : $stateName');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: GestureDetector(
+          onTap: _hitPressed,
+          child: RiveAnimation.asset(
+            'assets/images/rive_one.riv',
+            // controllers: [_controller],
+            // stateMachines: const ['Pressed'],
+            // Update the play state when the widget's initialized
+            onInit: _onInit,
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _togglePlay,
+        tooltip: isPlaying ? 'Pause' : 'Play',
+        child: Icon(
+          isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
+      ),
+    );
+  }
+}
+
+class CustomPaintInterAction extends StatefulWidget {
+  const CustomPaintInterAction({Key? key}) : super(key: key);
+
+  @override
+  State<CustomPaintInterAction> createState() => _CustomPaintInterActionState();
+}
+
+class _CustomPaintInterActionState extends State<CustomPaintInterAction>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller;
+  late Animation<double> animation;
+  late final PageController pageController;
+
+  bool isAnimationTouch = true;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    pageController = PageController(initialPage: 0)
+      ..addListener(() {
+        pageController.offset;
+      });
+
+    animation = Tween<double>(begin: 0, end: 2.0)
+        .animate(CurvedAnimation(parent: controller, curve: Curves.linear));
+
+    // controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+            child: Column(
+      children: [
+        Container(
+          width: 200,
+          height: 200,
+        ),
+        Container(
+            width: 200,
+            height: 200,
+            child: CustomPaint(
+              painter: LocationCustomPainter(pageController),
+            )),
+        Expanded(
+          child: PageView(
+            controller: pageController,
+            children: [
+              Center(
+                child: Text('1'),
+              ),
+              Center(
+                child: Text('2'),
+              ),
+              Center(
+                child: Text('3'),
+              ),
+              Center(
+                child: Text('4'),
+              ),
+            ],
+          ),
+        ),
+        TextButton(
+          child: Text('animation restart'),
+          onPressed: () {
+            if (isAnimationTouch) {
+              controller.reverse();
+              setState(() {
+                isAnimationTouch = false;
+              });
+            } else {
+              controller.forward();
+              setState(() {
+                isAnimationTouch = true;
+              });
+            }
+          },
+        ),
+      ],
+    )));
+  }
+}
+
+class LocationCustomPainter extends CustomPainter {
+  final PageController _animation;
+
+  LocationCustomPainter(this._animation) : super(repaint: _animation);
+
+  Path _createAnyPath(Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    /// 이곳에 커스텀 ClipPath 작성
+    return Path()
+      ..lineTo(w, 0)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..lineTo(0, 0);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final animationPercent = _animation.page!;
+
+    final path = _createAnyPath(size);
+
+    final Paint paint = Paint();
+    paint.color = Colors.amberAccent;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 10.0;
+
+    /// 캔버스 자체를 돌리기
+    canvas.translate(size.width * 0.5, size.height * 0.5);
+    canvas.rotate(pi / 180 * animationPercent / 2 * 45);
+    canvas.translate(-size.width * 0.5, -size.height * 0.5);
+
+    canvas.translate(size.width * 0.5, size.height * 0.5);
+    canvas.rotate(pi / 180 * animationPercent / 4 * 45);
+    canvas.translate(-size.width * 0.5, -size.height * 0.5);
+
+    // canvas.drawPath(path, paint);
+
+    /// Path를 설정해서 마름모로 변환 시키기 - 변환될 꼭지점을 만들고 애니메이션 비율을 곱하면 됨
+    path.moveTo(0 + (size.width / 2 * animationPercent), 0);
+    // Top
+    path.lineTo(0 + (size.width / 2 * animationPercent), 0);
+    path.lineTo(size.width, 0 + (size.height / 2 * animationPercent));
+    // Bottom
+    path.lineTo(size.width - (size.width / 2 * animationPercent), size.height);
+    path.lineTo(0, size.height - (size.height / 2 * animationPercent));
+    // End
+    // path.close();
+
+    path.moveTo(0, 0);
+    // Top
+    path.lineTo(size.width * animationPercent, 0);
+    path.lineTo(size.width, size.height * animationPercent);
+    // Bottom
+    path.lineTo(size.width - (size.width * animationPercent), size.height);
+    path.lineTo(0, size.height - (size.height * animationPercent));
+    // End
+    // path.close();
+
+    path.moveTo(0 + (size.width / 4 * animationPercent), 0);
+    // Top
+    path.lineTo(0 + (size.width / 4 * animationPercent), 0);
+    path.lineTo(size.width, 0 + (size.height / 4 * animationPercent));
+    // Bottom
+    path.lineTo(size.width - (size.width / 4 * animationPercent), size.height);
+    path.lineTo(0, size.height - (size.height / 4 * animationPercent));
+    // End
+    // path.close();
+
+    path.moveTo(0 + (size.width * animationPercent), 0);
+    // Top
+    path.lineTo(0 + (size.width * animationPercent), 0);
+    path.lineTo(size.width, 0 + (size.height * animationPercent));
+    // Bottom
+    path.lineTo(size.width - (size.width * animationPercent), size.height);
+    path.lineTo(0, size.height - (size.height * animationPercent));
+    // End
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class OpacityDrawer extends StatefulWidget {
+  const OpacityDrawer({Key? key}) : super(key: key);
+
+  @override
+  State<OpacityDrawer> createState() => _OpacityDrawerState();
+}
+
+class _OpacityDrawerState extends State<OpacityDrawer> {
+  bool isInVisible = false;
+  final int visibleIndex = 3;
+  final List<bool> visibleList = [true, true, true];
+  double fontSize = 12.0;
+
+  changeVisibleList(int index) {
+    for (int i = 0; i < visibleIndex; i++) {
+      if (i == index) {
+        visibleList[i] = true;
+      } else {
+        visibleList[i] = false;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawerScrimColor: Colors.transparent,
+      endDrawer: Drawer(
+        backgroundColor: isInVisible ? Colors.white.withOpacity(0.5) : null,
+        width: 220,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Opacity(
+                opacity: visibleList[0] ? 1.0 : 0.5,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Text('글자 크기 조절하기', style: TextStyle(color: Colors.red)),
+                      Slider.adaptive(
+                        value: fontSize,
+                        onChangeEnd: (val) {
+                          setState(() {
+                            changeVisibleList(0);
+                            isInVisible = false;
+                          });
+                        },
+                        onChangeStart: (val) {
+                          setState(() {
+                            changeVisibleList(0);
+                            isInVisible = true;
+                          });
+                        },
+                        onChanged: (double value) {
+                          setState(() {
+                            fontSize = value;
+                          });
+                        },
+                        label: fontSize.round().toString(),
+                        divisions: 10,
+                        max: 18,
+                        min: 8,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 26),
+              Opacity(
+                opacity: visibleList[1] ? 1.0 : 0.5,
+                child: Container(
+                  color: Colors.white,
+                  child: Text('메뉴 1', style: TextStyle(color: Colors.red)),
+                ),
+              ),
+              SizedBox(height: 26),
+              Opacity(
+                opacity: visibleList[2] ? 1.0 : 0.5,
+                child: Container(
+                  color: Colors.white,
+                  child: Text('메뉴 2', style: TextStyle(color: Colors.red)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: Center(
+        child: Text(
+            '이번 포스트에서는 앱 <밀리의 서재>의 기능 중 일부를 구현해보려한다.'
+            '우연히 <밀리의 서재> 웹 사이트에서 앱을 소개하는 동영상을 보았는데 흥미로운 부분이 있었다.'
+            '바로 시선 감지(Eye Tracking)와 뷰어 내부의 스타일 변경 인터랙션, UX이다.'
+            '재밌어 보이는 기능, 인터랙션 이였기 때문에 두가지 기능 모두 구현해보려 했었는데, 시선 감지의 정확도가 좀 떨어져서 뷰어 내부의 스타일 변경 인터랙션만 작성하려 한다.'
+            '밀리의 서재에서는 drawer에서 텍스트 스타일을 커스텀할 수 있는데, 이 과정에서의 UX를 굉장히 잘 만들었다고 생각한다.'
+            '그래서, 어떤 UX인데??'
+            '밀리의서재 - 자유로운 보기 설정'
+            '위의 이미지에서 볼 수 있듯이, 폰트 사이즈를 변경하게되면, 뒤의 글의 크기가 실시간으로 변경되며 이를 바로 확인할 수 있다.'
+            '이 과정에서 유저가 드래그하고 있는 영역을 제외하고는 투명하게 변한다'
+            '텍스트 크기를 표현하는 숫자가 얼마나 크고 작은지, 바로 눈으로 확인하여 쉽게 알 수 있게 하였다.'
+            '드로워(Drawer)?'
+            '햄버거 버튼으로도 불리는 메뉴 버튼을 누르면 나오는 옆에서 튀어나오는 화면을 본적이 있을 것이다.'
+            '이것을 Drawer라고 한다. Drawer는 나오는 방향에 따라 이름을 다르게 부르는데 왼쪽 -> 오른쪽이면 Drawer, 오른쪽 -> 왼쪽이면 EndDrawer라고 부른다.'
+            '이는 Scaffold에서 선언할 수 있다.',
+            style: TextStyle(fontSize: fontSize)),
+      ),
     );
   }
 }
@@ -179,10 +706,10 @@ class ReverseCustomList extends StatefulWidget {
   @override
   State<ReverseCustomList> createState() => _ReverseCustomListState();
 }
-class _ReverseCustomListState extends State<ReverseCustomList> {
 
-  List<String> testList = List.generate(30, (index)=> index.toString());
-  late Map<String,int> testListIndex = {};
+class _ReverseCustomListState extends State<ReverseCustomList> {
+  List<String> testList = List.generate(30, (index) => index.toString());
+  late Map<String, int> testListIndex = {};
   int count = 30;
 
   @override
@@ -195,11 +722,11 @@ class _ReverseCustomListState extends State<ReverseCustomList> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-          children: [
-            Expanded(
-              child: ListView.custom(
-                reverse: true,
-                childrenDelegate: SliverChildBuilderDelegate(
+        children: [
+          Expanded(
+            child: ListView.custom(
+              reverse: true,
+              childrenDelegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final element = testList[testList.length - 1 - index];
 
@@ -216,24 +743,26 @@ class _ReverseCustomListState extends State<ReverseCustomList> {
                     final val = testListIndex[valueKey.value]!;
 
                     return testList.length - 1 - val;
-                  }
-                ),
-              ),
+                  }),
             ),
-            TextButton(child: Text('리스트 추가하기'),onPressed: (){
+          ),
+          TextButton(
+            child: Text('리스트 추가하기'),
+            onPressed: () {
               setState(() {
                 testList.add(count.toString());
                 updateListIndex(testList.length - 1);
-                count ++;
+                count++;
               });
-            },),
-          ],
-        ),
+            },
+          ),
+        ],
+      ),
     );
   }
 
   void updateListIndex(int start) {
-    for(int i = start; i < testList.length; i ++){
+    for (int i = start; i < testList.length; i++) {
       testListIndex[testList[i]] = i;
     }
   }
@@ -245,13 +774,16 @@ class OKCustomPainter extends StatefulWidget {
   @override
   State<OKCustomPainter> createState() => _OKCustomPainterState();
 }
-class _OKCustomPainterState extends State<OKCustomPainter> with SingleTickerProviderStateMixin{
+
+class _OKCustomPainterState extends State<OKCustomPainter>
+    with SingleTickerProviderStateMixin {
   late final AnimationController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this,duration: Duration(milliseconds: 800));
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 800));
 
     controller.forward();
   }
@@ -268,22 +800,23 @@ class _OKCustomPainterState extends State<OKCustomPainter> with SingleTickerProv
       backgroundColor: Colors.black,
       body: Center(
         child: CustomPaint(
-            size: const Size(300,300),
-            painter: AnimatedPathPainter(controller),
-          ),
+          size: const Size(300, 300),
+          painter: AnimatedPathPainter(controller),
+        ),
       ),
     );
   }
 }
+
 class AnimatedPathPainter extends CustomPainter {
   final Animation<double> _animation;
 
   AnimatedPathPainter(this._animation) : super(repaint: _animation);
 
   Path extractPathUntilLength(
-      Path originalPath,
-      double length,
-      ) {
+    Path originalPath,
+    double length,
+  ) {
     var currentLength = 0.0;
 
     final path = Path();
@@ -315,9 +848,9 @@ class AnimatedPathPainter extends CustomPainter {
   }
 
   Path createAnimatedPath(
-      Path originalPath,
-      double animationPercent,
-      ) {
+    Path originalPath,
+    double animationPercent,
+  ) {
     // ComputeMetrics can only be iterated once!
     final totalLength = originalPath
         .computeMetrics()
@@ -339,11 +872,13 @@ class AnimatedPathPainter extends CustomPainter {
     /// 이곳에 커스텀 ClipPath 작성
     return Path()
       ..moveTo(w * 0.5, 0)
-      ..relativeArcToPoint(Offset(0, h),radius: Radius.circular(10),clockwise: false)
-      ..relativeArcToPoint(Offset(0,-h),radius: Radius.circular(10),clockwise: false)
-      ..moveTo(startPoint.dx,startPoint.dy)
-      ..lineTo(centerPoint.dx,centerPoint.dy)
-      ..lineTo(endPoint.dx,endPoint.dy);
+      ..relativeArcToPoint(Offset(0, h),
+          radius: Radius.circular(10), clockwise: false)
+      ..relativeArcToPoint(Offset(0, -h),
+          radius: Radius.circular(10), clockwise: false)
+      ..moveTo(startPoint.dx, startPoint.dy)
+      ..lineTo(centerPoint.dx, centerPoint.dy)
+      ..lineTo(endPoint.dx, endPoint.dy);
   }
 
   Path _createCheckPath(Size size) {
@@ -356,9 +891,9 @@ class AnimatedPathPainter extends CustomPainter {
 
     /// 이곳에 커스텀 ClipPath 작성
     return Path()
-      ..moveTo(startPoint.dx,startPoint.dy)
-      ..lineTo(centerPoint.dx,centerPoint.dy)
-      ..lineTo(endPoint.dx,endPoint.dy);
+      ..moveTo(startPoint.dx, startPoint.dy)
+      ..lineTo(centerPoint.dx, centerPoint.dy)
+      ..lineTo(endPoint.dx, endPoint.dy);
   }
 
   @override
@@ -385,7 +920,9 @@ class AnimatedPathPainter extends CustomPainter {
       paint,
     );
 
-    final checkPath = createAnimatedPath(_createCheckPath(size), animationPercent * 2);
+    final checkPath =
+        createAnimatedPath(_createCheckPath(size), animationPercent * 2);
+
     /// check표시 애니메이션
     canvas.drawPath(checkPath, paint);
   }
@@ -403,21 +940,28 @@ class SecondPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          color: Colors.orange,
+        color: Colors.orange,
         child: Center(
-          child: TextButton(child: Text('뒤로'),onPressed: (){Navigator.of(context).pop();}),
+          child: TextButton(
+              child: Text('뒤로'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
         ),
       ),
     );
   }
 }
+
 class ClipHalfWidget extends StatefulWidget {
   const ClipHalfWidget({Key? key}) : super(key: key);
 
   @override
   State<ClipHalfWidget> createState() => _ClipHalfWidgetState();
 }
-class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProviderStateMixin{
+
+class _ClipHalfWidgetState extends State<ClipHalfWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<Offset> slideAnimation1;
   late Animation<Offset> slideAnimation2;
@@ -429,8 +973,8 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
   void initState() {
     super.initState();
 
-    controller = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 800));
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 800));
 
     // 오른쪽으로 이동
     slideAnimation1 =
@@ -438,38 +982,38 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
             CurvedAnimation(parent: controller, curve: Curves.easeInCubic));
     // 왼쪽으로 이동
     slideAnimation2 =
-        Tween<Offset>(begin: Offset.zero, end: const Offset(- 1.0, 0.0)).animate(
+        Tween<Offset>(begin: Offset.zero, end: const Offset(-1.0, 0.0)).animate(
             CurvedAnimation(parent: controller, curve: Curves.easeInCubic));
 
-    controller.addListener((){
-      if(controller.isCompleted) {
-        Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) {
-                return SecondPage();
-              },
-              transitionDuration: const Duration(milliseconds: 800),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                final opacityTween = Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+    controller.addListener(() {
+      if (controller.isCompleted) {
+        Navigator.of(context).push(PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return SecondPage();
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final opacityTween =
+                Tween<double>(begin: 0.0, end: 1.0).animate(animation);
 
-                return BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: FadeTransition(opacity: opacityTween, child: child),
-                );
-              },
-            )
-        );
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: FadeTransition(opacity: opacityTween, child: child),
+            );
+          },
+        ));
         controller.reverse();
       }
     });
 
-    leftScrollController = ScrollController(keepScrollOffset: true)..addListener((){
-      rightScrollController.jumpTo(leftScrollController.offset);
-    });
-    rightScrollController = ScrollController(keepScrollOffset: true)..addListener((){
-
-      // leftScrollController.jumpTo(rightScrollController.offset);
-    });
+    leftScrollController = ScrollController(keepScrollOffset: true)
+      ..addListener(() {
+        rightScrollController.jumpTo(leftScrollController.offset);
+      });
+    rightScrollController = ScrollController(keepScrollOffset: true)
+      ..addListener(() {
+        // leftScrollController.jumpTo(rightScrollController.offset);
+      });
   }
 
   @override
@@ -483,18 +1027,16 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         controller.forward();
-        if(controller.isCompleted) {
-
-        }
+        if (controller.isCompleted) {}
       },
       child: Scaffold(
         body: Stack(
           children: [
             AnimatedBuilder(
               animation: controller,
-              builder: (context,child) {
+              builder: (context, child) {
                 return SlideTransition(
                   position: slideAnimation2,
                   child: child,
@@ -509,11 +1051,13 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
                     child: Column(
                       children: [
                         const SizedBox(height: 100),
-                        ...List.generate(30,(index) =>
-                        Container(
-                    color: Colors.redAccent,
-                    margin: EdgeInsets.only(bottom: 30),
-                    child: Text('test --------- ${index.toString()}')),
+                        ...List.generate(
+                          30,
+                          (index) => Container(
+                              color: Colors.redAccent,
+                              margin: EdgeInsets.only(bottom: 30),
+                              child:
+                                  Text('test --------- ${index.toString()}')),
                         )
                       ],
                     ),
@@ -523,7 +1067,7 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
             ),
             AnimatedBuilder(
               animation: controller,
-              builder: (context,child) {
+              builder: (context, child) {
                 return SlideTransition(
                   position: slideAnimation1,
                   child: child,
@@ -537,11 +1081,13 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
                     child: Column(
                       children: [
                         const SizedBox(height: 100),
-                        ...List.generate(30,(index) =>
-                            Container(
-                                color: Colors.redAccent,
-                                margin: EdgeInsets.only(bottom: 30),
-                                child: Text('test --------- ${index.toString()}')),
+                        ...List.generate(
+                          30,
+                          (index) => Container(
+                              color: Colors.redAccent,
+                              margin: EdgeInsets.only(bottom: 30),
+                              child:
+                                  Text('test --------- ${index.toString()}')),
                         )
                       ],
                     ),
@@ -555,10 +1101,12 @@ class _ClipHalfWidgetState extends State<ClipHalfWidget> with SingleTickerProvid
     );
   }
 }
+
 class CustomClipPath1 extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    Path path = Path()..addRect(Rect.fromLTRB(0, 0, size.width / 2, size.height));
+    Path path = Path()
+      ..addRect(Rect.fromLTRB(0, 0, size.width / 2, size.height));
 
     return path;
   }
@@ -568,10 +1116,12 @@ class CustomClipPath1 extends CustomClipper<Path> {
     return true;
   }
 }
+
 class CustomClipPath2 extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    Path path = Path()..addRect(Rect.fromLTRB(size.width / 2, 0, size.width, size.height));
+    Path path = Path()
+      ..addRect(Rect.fromLTRB(size.width / 2, 0, size.width, size.height));
 
     return path;
   }
@@ -1153,7 +1703,8 @@ class subShlScreen2 extends StatelessWidget {
 }
 
 class tmpScreen1 extends StatelessWidget {
-  const tmpScreen1({required this.id,this.id2,this.auth = false,Key? key}) : super(key: key);
+  const tmpScreen1({required this.id, this.id2, this.auth = false, Key? key})
+      : super(key: key);
 
   final String id;
   final String? id2;
@@ -1161,8 +1712,7 @@ class tmpScreen1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    if(id2 == '123'){
+    if (id2 == '123') {
       return BlocProvider<TmpBloc>(
         create: (context) => serviceLocator()
           ..add(InitTmpEvent1())
@@ -1175,7 +1725,7 @@ class tmpScreen1 extends StatelessWidget {
                   final count = state.count;
                   final countList = state.countList;
 
-                  if(auth) {
+                  if (auth) {
                     return Column(
                       children: [
                         SizedBox(
@@ -1198,10 +1748,12 @@ class tmpScreen1 extends StatelessWidget {
                                 serviceLocator<TmpBloc>().add(MinusCount())),
                         TextButton(
                             child: Text('tmp1sub1'),
-                            onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                            onPressed: () => context.goNamed('tmp1_sub1',
+                                params: {'id': '12', 'id2': '12'})),
                         TextButton(
                             child: Text('tmp1sub2'),
-                            onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                            onPressed: () => context.goNamed('tmp1_sub2',
+                                params: {'id': '12', 'id2': '123'})),
                         TextButton(
                             child: Text('tmp2'),
                             onPressed: () => context.go('/2?id=123')),
@@ -1217,7 +1769,6 @@ class tmpScreen1 extends StatelessWidget {
                       ],
                     );
                   }
-
 
                   return Column(
                     children: [
@@ -1241,10 +1792,12 @@ class tmpScreen1 extends StatelessWidget {
                               serviceLocator<TmpBloc>().add(MinusCount())),
                       TextButton(
                           child: Text('tmp1sub1'),
-                          onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                          onPressed: () => context.goNamed('tmp1_sub1',
+                              params: {'id': '12', 'id2': '12'})),
                       TextButton(
                           child: Text('tmp1sub2'),
-                          onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                          onPressed: () => context.goNamed('tmp1_sub2',
+                              params: {'id': '12', 'id2': '123'})),
                       TextButton(
                           child: Text('tmp2'),
                           onPressed: () => context.go('/2?id=123')),
@@ -1265,7 +1818,7 @@ class tmpScreen1 extends StatelessWidget {
           ),
         ),
       );
-    }else {
+    } else {
       return BlocProvider<TmpBloc>(
         create: (context) => serviceLocator()
           ..add(InitTmpEvent1())
@@ -1278,7 +1831,7 @@ class tmpScreen1 extends StatelessWidget {
                   final count = state.count;
                   final countList = state.countList;
 
-                  if(auth) {
+                  if (auth) {
                     return Column(
                       children: [
                         SizedBox(
@@ -1300,10 +1853,12 @@ class tmpScreen1 extends StatelessWidget {
                                 serviceLocator<TmpBloc>().add(MinusCount())),
                         TextButton(
                             child: Text('tmp1sub1'),
-                            onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                            onPressed: () => context.goNamed('tmp1_sub1',
+                                params: {'id': '12', 'id2': '12'})),
                         TextButton(
                             child: Text('tmp1sub2'),
-                            onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                            onPressed: () => context.goNamed('tmp1_sub2',
+                                params: {'id': '12', 'id2': '123'})),
                         TextButton(
                             child: Text('tmp2'),
                             onPressed: () => context.go('/2?id=123')),
@@ -1341,10 +1896,12 @@ class tmpScreen1 extends StatelessWidget {
                               serviceLocator<TmpBloc>().add(MinusCount())),
                       TextButton(
                           child: Text('tmp1sub1'),
-                          onPressed: () => context.goNamed('tmp1_sub1',params: {'id' : '12','id2': '12'})),
+                          onPressed: () => context.goNamed('tmp1_sub1',
+                              params: {'id': '12', 'id2': '12'})),
                       TextButton(
                           child: Text('tmp1sub2'),
-                          onPressed: () => context.goNamed('tmp1_sub2',params: {'id' : '12','id2': '123'})),
+                          onPressed: () => context.goNamed('tmp1_sub2',
+                              params: {'id': '12', 'id2': '123'})),
                       TextButton(
                           child: Text('tmp2'),
                           onPressed: () => context.go('/2?id=123')),
@@ -1384,7 +1941,9 @@ class tmpScreen2 extends StatelessWidget {
                 height: 120,
               ),
               TextButton(
-                  child: Text('tmp1'), onPressed: () => context.goNamed('tmp1',params: {'id' : '123'})),
+                  child: Text('tmp1'),
+                  onPressed: () =>
+                      context.goNamed('tmp1', params: {'id': '123'})),
               TextButton(
                   child: Text('tmp3'),
                   onPressed: () => context.go('/auth/1/123/3/123')),

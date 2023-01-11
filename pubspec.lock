@@ -779,6 +779,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.0"
+  rive:
+    dependency: "direct main"
+    description:
+      name: rive
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.1"
   rxdart:
     dependency: "direct main"
     description:
@@ -786,6 +793,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.27.5"
+  screen_utils:
+    dependency: "direct main"
+    description:
+      name: screen_utils
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   screenshot:
     dependency: "direct main"
     description:
